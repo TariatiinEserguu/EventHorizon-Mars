@@ -1,0 +1,13 @@
+{
+  "id": "nasa-sev",
+  "name": "Space Exploration Vehicle (3D model)",
+  "creator": "NASA",
+  "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Exploration%20Vehicle",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Pressurized exploration rover parked at the colony (replaces the toy rover)",
+  "files": {
+    "SEV.glb": "09dcfbd45a475440de4ca2405fe3be4f784dee6f12e752bad5faa9f6db6c4a8d"
+  }
+}

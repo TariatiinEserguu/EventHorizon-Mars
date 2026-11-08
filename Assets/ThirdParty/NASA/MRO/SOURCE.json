@@ -1,0 +1,13 @@
+{
+  "id": "nasa-mro",
+  "name": "Mars Reconnaissance Orbiter (3D model)",
+  "creator": "NASA/JPL-Caltech",
+  "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Orbiter crossing the main-menu sky",
+  "files": {
+    "MRO.glb": "b195c566d227dec8e42ca2fafcc2a8cc26a127e04ed577e4b9515199d2002d9e"
+  }
+}

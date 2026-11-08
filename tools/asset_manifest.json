@@ -1,0 +1,425 @@
+{
+  "_comment": "Single source of truth for every third-party asset. tools/fetch_assets.py downloads from it and regenerates ASSET_CREDITS.md from it. Add an asset here only after reading its license on the source page yourself.",
+  "user_agent": "EventHorizonMars-AssetFetcher/1.0 (+https://github.com/TariatiinEserguu/EventHorizon-Mars)",
+  "thirdparty_root": "Assets/ThirdParty",
+  "assets": [
+    {
+      "id": "kenney-space-kit",
+      "name": "Space Kit (150 models)",
+      "creator": "Kenney",
+      "source": "https://kenney.nl/assets/space-kit",
+      "license": "CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: pack page states 'Creative Commons CC0'",
+      "used_for": "Habitat, greenhouse dome, oxygen plant, water/oxygen/food tanks, battery bank, comms dish, lander (stacked rocket parts), exploration rover (scenery), static astronaut fallback",
+      "fetch": {
+        "method": "kenney",
+        "slug": "space-kit"
+      },
+      "dest": "Kenney/SpaceKit",
+      "include": [
+        "Models/FBX format/*",
+        "License.txt",
+        "Preview.png"
+      ]
+    },
+    {
+      "id": "kenney-space-station-kit",
+      "name": "Space Station Kit (90 models)",
+      "creator": "Kenney",
+      "source": "https://kenney.nl/assets/space-station-kit",
+      "license": "CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: pack page states 'Creative Commons CC0'",
+      "used_for": "Downloaded for habitat interiors, airlocks, doors and lab furniture (not placed in a scene yet)",
+      "fetch": {
+        "method": "kenney",
+        "slug": "space-station-kit"
+      },
+      "dest": "Kenney/SpaceStationKit",
+      "include": [
+        "Models/FBX format/*",
+        "Models/FBX format/Textures/*",
+        "License.txt",
+        "Preview.png"
+      ]
+    },
+    {
+      "id": "kenney-sci-fi-sounds",
+      "name": "Sci-fi Sounds (70 sounds)",
+      "creator": "Kenney",
+      "source": "https://kenney.nl/assets/sci-fi-sounds",
+      "license": "CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: pack page states 'Creative Commons CC0'",
+      "used_for": "Downloaded for machinery, airlock, UI and lab sound effects (not wired to gameplay yet)",
+      "fetch": {
+        "method": "kenney",
+        "slug": "sci-fi-sounds"
+      },
+      "dest": "Kenney/SciFiSounds",
+      "include": [
+        "Audio/*",
+        "License.txt"
+      ]
+    },
+    {
+      "id": "kenney-impact-sounds",
+      "name": "Impact Sounds (130 sounds)",
+      "creator": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "license": "CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: pack page states 'Creative Commons CC0'",
+      "used_for": "Downloaded for footsteps and impacts (not wired to gameplay yet)",
+      "fetch": {
+        "method": "kenney",
+        "slug": "impact-sounds"
+      },
+      "dest": "Kenney/ImpactSounds",
+      "include": [
+        "Audio/*",
+        "License.txt"
+      ]
+    },
+    {
+      "id": "quaternius-ultimate-space-kit",
+      "name": "Ultimate Space Kit (92 models, animated characters)",
+      "creator": "Quaternius",
+      "source": "https://quaternius.com/packs/ultimatespacekit.html",
+      "license": "CC0 1.0 (as stated on the pack page)",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: pack page states 'License CC0'. Quaternius' site-wide license page now shows the Quaternius Asset License v1.0 (dated 2026-08-28) for newer releases, which forbids redistributing the raw assets. We keep raw Quaternius files out of git either way.",
+      "used_for": "Animated astronaut rigs (4 characters, 18 clips incl. Idle, Walk, Run, Jump, Wave), worn with our visor and backpack",
+      "fetch": {
+        "method": "gdrive_folder",
+        "folder_url": "https://drive.google.com/drive/folders/17F8HlI2zPTlo32aieW5YPPwOk78xo-2m"
+      },
+      "dest": "Quaternius/UltimateSpaceKit",
+      "include": [
+        "Characters/FBX/Astronaut_*",
+        "*License*"
+      ]
+    },
+    {
+      "id": "quaternius-ultimate-crops",
+      "name": "Ultimate Crops Pack (100+ crops, 5 growth stages)",
+      "creator": "Quaternius",
+      "source": "https://quaternius.com/packs/ultimatecrops.html",
+      "license": "CC0 1.0 (as stated on the pack page)",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: pack page states 'License CC0'. Same QAL note as the Ultimate Space Kit.",
+      "used_for": "Growth-stage models for lettuce, potato, tomato, wheat and other crops (until fetched, beds use a primitive fallback)",
+      "fetch": {
+        "method": "gdrive_folder",
+        "folder_url": "https://drive.google.com/drive/folders/1uhbi-NWp7pwqOGtraBZurbphyxAvoABZ"
+      },
+      "dest": "Quaternius/UltimateCrops",
+      "include": [
+        "*FBX*/*",
+        "*FBX*/*/*",
+        "*License*"
+      ]
+    },
+    {
+      "id": "polyhaven-mars-ground",
+      "name": "Ground textures: Red Sand, Cracked Red Ground, Red Laterite Soil Stones",
+      "creator": "Poly Haven (Rohit Seervi; Amal Kumar)",
+      "source": "https://polyhaven.com/a/red_sand",
+      "extra_sources": [
+        "https://polyhaven.com/a/cracked_red_ground",
+        "https://polyhaven.com/a/red_laterite_soil_stones"
+      ],
+      "license": "CC0 1.0",
+      "license_url": "https://polyhaven.com/license",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: polyhaven.com/license states all assets are CC0",
+      "used_for": "Mars terrain layers (tinted toward Martian regolith colour), 1K",
+      "fetch": {
+        "method": "polyhaven",
+        "slugs": [
+          "red_sand",
+          "cracked_red_ground",
+          "red_laterite_soil_stones"
+        ],
+        "maps": [
+          "Diffuse",
+          "nor_gl"
+        ],
+        "resolution": "1k",
+        "format": "jpg"
+      },
+      "dest": "PolyHaven/MarsGround"
+    },
+    {
+      "id": "polyhaven-rock-boulder-dry",
+      "name": "Rock Boulder Dry (texture)",
+      "creator": "Poly Haven (Dimitrios Savva, Rico Cilliers)",
+      "source": "https://polyhaven.com/a/rock_boulder_dry",
+      "license": "CC0 1.0",
+      "license_url": "https://polyhaven.com/license",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: polyhaven.com/license states all assets are CC0",
+      "used_for": "Texture for procedural boulders (box-projected UVs) and the steep-rock terrain layer, 1K",
+      "fetch": {
+        "method": "polyhaven",
+        "slugs": [
+          "rock_boulder_dry"
+        ],
+        "maps": [
+          "Diffuse",
+          "nor_gl"
+        ],
+        "resolution": "1k",
+        "format": "jpg"
+      },
+      "dest": "PolyHaven/Rock"
+    },
+    {
+      "id": "solarsystemscope-planets",
+      "name": "Planet, Sun, Moon and star-field textures",
+      "creator": "Solar System Scope",
+      "source": "https://www.solarsystemscope.com/textures/",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution_required": true,
+      "attribution_text": "Planet textures by Solar System Scope (https://www.solarsystemscope.com/textures/), licensed under CC BY 4.0. Based on NASA imagery and elevation data.",
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: page states 'Distributed under Attribution 4.0 International license: You may use, adapt, and share these textures for any purpose, even commercially.'",
+      "used_for": "Mars, Earth (+clouds), Moon, Sun, Mercury, Venus, Jupiter, Saturn (+ring), Uranus, Neptune, Milky Way skybox",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "2k_mars.jpg": "https://www.solarsystemscope.com/textures/download/2k_mars.jpg",
+          "2k_earth_daymap.jpg": "https://www.solarsystemscope.com/textures/download/2k_earth_daymap.jpg",
+          "2k_earth_clouds.jpg": "https://www.solarsystemscope.com/textures/download/2k_earth_clouds.jpg",
+          "2k_moon.jpg": "https://www.solarsystemscope.com/textures/download/2k_moon.jpg",
+          "2k_sun.jpg": "https://www.solarsystemscope.com/textures/download/2k_sun.jpg",
+          "2k_mercury.jpg": "https://www.solarsystemscope.com/textures/download/2k_mercury.jpg",
+          "2k_venus_atmosphere.jpg": "https://www.solarsystemscope.com/textures/download/2k_venus_atmosphere.jpg",
+          "2k_jupiter.jpg": "https://www.solarsystemscope.com/textures/download/2k_jupiter.jpg",
+          "2k_saturn.jpg": "https://www.solarsystemscope.com/textures/download/2k_saturn.jpg",
+          "2k_saturn_ring_alpha.png": "https://www.solarsystemscope.com/textures/download/2k_saturn_ring_alpha.png",
+          "2k_uranus.jpg": "https://www.solarsystemscope.com/textures/download/2k_uranus.jpg",
+          "2k_neptune.jpg": "https://www.solarsystemscope.com/textures/download/2k_neptune.jpg",
+          "8k_stars_milky_way.jpg": "https://www.solarsystemscope.com/textures/download/8k_stars_milky_way.jpg"
+        }
+      },
+      "dest": "SolarSystemScope"
+    },
+    {
+      "id": "nasa-phobos-deimos",
+      "name": "Phobos and Deimos surface textures",
+      "creator": "NASA/JPL/Solar System Simulator",
+      "source": "https://science.nasa.gov/3d-resources/mars-phobos/",
+      "extra_sources": [
+        "https://science.nasa.gov/3d-resources/mars-deimos/"
+      ],
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "attribution_text": "Phobos and Deimos textures: NASA/JPL/Solar System Simulator.",
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: NASA media are generally not copyrighted in the US; NASA should be acknowledged as the source; use must not imply NASA endorsement; the NASA insignia and logotype are not public domain.",
+      "used_for": "Textures on the procedurally generated irregular moon meshes",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "Phobos.jpg": "https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/mars---phobos/Mars%20-%20Phobos.jpg",
+          "Deimos.jpg": "https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/mars---deimos/Mars%20-%20Deimos.jpg"
+        }
+      },
+      "dest": "NASA/MarsMoons"
+    },
+    {
+      "id": "nasa-perseverance",
+      "name": "Mars 2020 Perseverance Rover (3D model)",
+      "creator": "NASA/Jet Propulsion Laboratory",
+      "source": "https://science.nasa.gov/3d-resources/mars-2020-perseverance-rover/",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "attribution_text": "Mars 2020 Perseverance Rover model: NASA/JPL-Caltech.",
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: listed in NASA 3D Resources; same NASA media terms as above.",
+      "used_for": "Scientifically accurate landmark rover the player can inspect (not the drivable vehicle)",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "Perseverance.glb": "https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/model/mars-2020-perseverance-rover/Mars%202020%20Perseverance%20Rover.glb"
+        }
+      },
+      "dest": "NASA/Perseverance"
+    },
+    {
+      "id": "nasa-ingenuity",
+      "name": "Ingenuity Mars Helicopter (3D model)",
+      "creator": "NASA/Brian E. Kumanchik",
+      "source": "https://science.nasa.gov/3d-resources/ingenuity-mars-helicopter/",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "attribution_text": "Ingenuity Mars Helicopter model: NASA/Brian E. Kumanchik.",
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-08: listed in NASA 3D Resources; same NASA media terms as above.",
+      "used_for": "Landmark and research prop near the Perseverance site",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "Ingenuity.glb": "https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/model/ingenuity-mars-helicopter/Ingenuity%20Mars%20Helicopter.glb"
+        }
+      },
+      "dest": "NASA/Ingenuity"
+    },
+    {
+      "id": "nasa-sev",
+      "name": "Space Exploration Vehicle (3D model)",
+      "creator": "NASA",
+      "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Exploration%20Vehicle",
+      "attribution_text": "Space Exploration Vehicle model: NASA (NASA-3D-Resources).",
+      "verified": "2026-11-09: official NASA GitHub repository of 3D resources; preview shows no NASA insignia. NASA media terms apply.",
+      "used_for": "Pressurized exploration rover parked at the colony (replaces the toy rover)",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "SEV.glb": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Space%20Exploration%20Vehicle/Space%20Exploration%20Vehicle.glb"
+        }
+      },
+      "dest": "NASA/SEV",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "nasa-dsn34",
+      "name": "Deep Space Network 34-meter antenna (3D model)",
+      "creator": "NASA/JPL",
+      "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Deep%20Space%20Network%2034-meter",
+      "attribution_text": "Deep Space Network antenna model: NASA/JPL (NASA-3D-Resources).",
+      "verified": "2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply.",
+      "used_for": "Colony relay antenna (scaled down), replaces the toy satellite dish",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "DSN34.glb": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Deep%20Space%20Network%2034-meter/Deep%20Space%20Network%2034-meter.glb"
+        }
+      },
+      "dest": "NASA/DSN34",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "nasa-mro",
+      "name": "Mars Reconnaissance Orbiter (3D model)",
+      "creator": "NASA/JPL-Caltech",
+      "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)",
+      "attribution_text": "Mars Reconnaissance Orbiter model: NASA/JPL-Caltech (NASA-3D-Resources).",
+      "verified": "2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply.",
+      "used_for": "Orbiter crossing the main-menu sky",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "MRO.glb": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A).glb"
+        }
+      },
+      "dest": "NASA/MRO",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "fonts-ofl",
+      "name": "Rajdhani and Share Tech Mono fonts",
+      "creator": "Indian Type Foundry; Carrois Type Design",
+      "source": "https://github.com/google/fonts/tree/main/ofl/rajdhani",
+      "extra_sources": [
+        "https://github.com/google/fonts/tree/main/ofl/sharetechmono"
+      ],
+      "license": "SIL Open Font License 1.1",
+      "license_url": "https://openfontlicense.org",
+      "attribution_required": true,
+      "attribution_text": "Rajdhani (Indian Type Foundry) and Share Tech Mono (Carrois Type Design), SIL Open Font License 1.1.",
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts.",
+      "used_for": "All interface text",
+      "fetch": {
+        "method": "bundled"
+      },
+      "dest": "../EventHorizon/Fonts"
+    }
+  ],
+  "generated": [
+    {
+      "name": "Phobos and Deimos meshes",
+      "how": "IrregularMoonMesh.cs: cratered, noise-displaced ellipsoids at real dimensions (Phobos 26.8 x 22.4 x 18.4 km with a Stickney-size crater; Deimos 15.0 x 12.2 x 10.4 km)"
+    },
+    {
+      "name": "Boulders, rocks and ice crystals",
+      "how": "RockMeshFactory.cs: flat-shaded, noise-displaced icospheres and hexagonal ice prisms, drawn with GPU instancing by RockScatter.cs"
+    },
+    {
+      "name": "Craters, dunes and the colony pad",
+      "how": "MarsTerrainGenerator.cs: heightmap craters (bowl, rim, ejecta), asymmetric dune field, slope-based texture painting"
+    },
+    {
+      "name": "Black hole, accretion disk, gravitational lensing",
+      "how": "BlackHoleLensing.shader: per-pixel Schwarzschild photon-path integration with Doppler and gravitational shifts. No images are used."
+    },
+    {
+      "name": "Solar panel array",
+      "how": "AssetIntegrationBuilder.cs: Unity primitives (no free panel model in the packs)"
+    },
+    {
+      "name": "Astronaut sun visor and life-support backpack",
+      "how": "AstronautSuit.cs: primitives attached to the rig's head and torso bones"
+    },
+    {
+      "name": "Planet spheres and Saturn's ring",
+      "how": "MeshBuilders.cs: equirectangular UV sphere and a radial-UV ring"
+    }
+  ],
+  "manual_only": [
+    {
+      "name": "Unity Asset Store free packs",
+      "why": "Downloads need a signed-in Unity account and the Asset Store EULA, so they cannot be scripted. Add each one through Package Manager > My Assets, then add a manifest entry with method 'manual'."
+    },
+    {
+      "name": "Sketchfab models",
+      "why": "Downloads need a signed-in account, and the license differs per model. Only CC0 or CC BY models qualify; record each one here before importing."
+    }
+  ]
+}

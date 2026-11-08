@@ -1,0 +1,13 @@
+{
+  "id": "nasa-perseverance",
+  "name": "Mars 2020 Perseverance Rover (3D model)",
+  "creator": "NASA/Jet Propulsion Laboratory",
+  "source": "https://science.nasa.gov/3d-resources/mars-2020-perseverance-rover/",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Scientifically accurate landmark rover the player can inspect (not the drivable vehicle)",
+  "files": {
+    "Perseverance.glb": "10db7c03a5e63a5a3b3e7baa6243aa4918ba045fa8ff0a731d0217491adc727f"
+  }
+}
