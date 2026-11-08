@@ -152,7 +152,7 @@ namespace EventHorizon.UI
                     title = "Moons",
                     basic = "Mars has two small moons. Phobos (27 x 22 x 18 km) orbits only 6,000 km above the surface, three times per sol. Deimos (15 x 12 x 10 km) orbits farther out. Both may be captured asteroids or debris from an ancient impact.",
                     expert = "Phobos orbits inside synchronous altitude, so tides drag it inward by about 1.8 m per century. In 30 to 50 million years it will hit Mars or break up into a ring.",
-                    simulationScene = Scenes.SpaceLab, simulationLabel = "VIEW PHOBOS AND DEIMOS",
+                    simulationScene = Scenes.MarsOrbit, simulationLabel = "VIEW PHOBOS AND DEIMOS",
                 },
                 new()
                 {
@@ -167,7 +167,7 @@ namespace EventHorizon.UI
                     title = "Black holes",
                     basic = "A black hole is mass compressed inside its Schwarzschild radius, r_s = 2GM/c^2. Inside that radius not even light can escape. The black-hole lab renders one by tracing how light bends near it.",
                     expert = "Key radii: photon sphere at 1.5 r_s (light can orbit), innermost stable circular orbit (ISCO) at 3 r_s (the inner edge of the accretion disk), and shadow radius 2.6 r_s. A clock at radius r runs slow by a factor sqrt(1 - r_s/r).",
-                    simulationScene = Scenes.SpaceLab, simulationLabel = "OPEN BLACK HOLE LAB",
+                    simulationScene = Scenes.BlackHoleLab, simulationLabel = "OPEN BLACK HOLE LAB",
                     calculator = p => { float logM = 6.63f, rr = 3f; Model(p, () =>
                         {
                             double m = Math.Pow(10, logM) * Msun, rs = 2 * G * m / (C * C);
@@ -181,7 +181,7 @@ namespace EventHorizon.UI
                     title = "Gravitational lensing",
                     basic = "Mass bends the path of light. Stars behind a black hole appear shifted and stretched, and a star directly behind it becomes a ring of light, an Einstein ring.",
                     expert = "Light passing a mass M at distance b is deflected by 4GM/(c^2 b), twice the Newtonian value. Eddington confirmed this in 1919. Einstein-ring angle: theta_E = sqrt(4GM/c^2 * D_ls / (D_l D_s)).",
-                    simulationScene = Scenes.SpaceLab, simulationLabel = "OPEN BLACK HOLE LAB",
+                    simulationScene = Scenes.BlackHoleLab, simulationLabel = "OPEN BLACK HOLE LAB",
                     calculator = p => { float logM = 0f, bR = 1f; Model(p, () =>
                         {
                             double m = Math.Pow(10, logM) * Msun, b = bR * 6.957e8;

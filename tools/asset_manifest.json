@@ -209,7 +209,7 @@
       "commercial_use": true,
       "modification": true,
       "verified": "2026-11-08: page states 'Distributed under Attribution 4.0 International license: You may use, adapt, and share these textures for any purpose, even commercially.'",
-      "used_for": "Mars, Earth (+clouds), Moon, Sun, Mercury, Venus, Jupiter, Saturn (+ring), Uranus, Neptune, Milky Way skybox",
+      "used_for": "Mars, Earth (day, night lights, clouds, ocean specular, normal), Moon, Sun, Mercury, Venus, Jupiter, Saturn (+ring), Uranus, Neptune, Milky Way panorama",
       "fetch": {
         "method": "direct",
         "files": {
@@ -225,7 +225,10 @@
           "2k_saturn_ring_alpha.png": "https://www.solarsystemscope.com/textures/download/2k_saturn_ring_alpha.png",
           "2k_uranus.jpg": "https://www.solarsystemscope.com/textures/download/2k_uranus.jpg",
           "2k_neptune.jpg": "https://www.solarsystemscope.com/textures/download/2k_neptune.jpg",
-          "8k_stars_milky_way.jpg": "https://www.solarsystemscope.com/textures/download/8k_stars_milky_way.jpg"
+          "8k_stars_milky_way.jpg": "https://www.solarsystemscope.com/textures/download/8k_stars_milky_way.jpg",
+          "2k_earth_nightmap.jpg": "https://www.solarsystemscope.com/textures/download/2k_earth_nightmap.jpg",
+          "2k_earth_specular_map.tif": "https://www.solarsystemscope.com/textures/download/2k_earth_specular_map.tif",
+          "2k_earth_normal_map.tif": "https://www.solarsystemscope.com/textures/download/2k_earth_normal_map.tif"
         }
       },
       "dest": "SolarSystemScope"
@@ -380,6 +383,108 @@
         "method": "bundled"
       },
       "dest": "../EventHorizon/Fonts"
+    },
+    {
+      "id": "nasa-svs-moon",
+      "name": "CGI Moon Kit: LRO color mosaic and LOLA elevation",
+      "creator": "NASA's Scientific Visualization Studio (Ernie Wright, Noah Petro)",
+      "source": "https://svs.gsfc.nasa.gov/4720",
+      "attribution_text": "Moon color and elevation: NASA's Scientific Visualization Studio, CGI Moon Kit (LRO LROC WAC, LOLA).",
+      "verified": "2026-11-09: SVS help page states all content is in the public domain unless otherwise noted; credit requested.",
+      "used_for": "Moon surface color and crater relief (normal map derived from the LOLA elevation)",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "lroc_color_2k.jpg": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg",
+          "ldem_3_8bit.jpg": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_3_8bit.jpg"
+        }
+      },
+      "dest": "NASA/MoonKit",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "nasa-gateway",
+      "name": "Gateway Core (3D model)",
+      "creator": "NASA",
+      "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Gateway",
+      "attribution_text": "Gateway model: NASA (NASA-3D-Resources).",
+      "verified": "2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply; check decals for insignia.",
+      "used_for": "Orbital research station above Mars",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "Gateway.glb": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Gateway/Gateway%20Core.glb"
+        }
+      },
+      "dest": "NASA/Gateway",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "nasa-mola",
+      "name": "MOLA global elevation map of Mars (MEGDR, 4 pixels/degree)",
+      "creator": "NASA/GSFC Mars Orbiter Laser Altimeter team (Smith et al.), via the PDS Geosciences Node",
+      "source": "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html",
+      "license": "NASA Planetary Data System (public domain)",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "attribution_text": "Mars topography: MGS MOLA Team, NASA/GSFC (PDS MEGDR).",
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-09: NASA PDS archival data product (US government work); credit to the MOLA team requested.",
+      "used_for": "Real Mars relief (normal map) on the planet seen from orbit and in the menu",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "megt90n000cb.img": "https://pds-geosciences.wustl.edu/mgs/mgs-m-mola-5-megdr-l3-v1/mgsl_300x/meg004/megt90n000cb.img",
+          "megt90n000cb.lbl": "https://pds-geosciences.wustl.edu/mgs/mgs-m-mola-5-megdr-l3-v1/mgsl_300x/meg004/megt90n000cb.lbl"
+        }
+      },
+      "dest": "NASA/MOLA"
+    },
+    {
+      "id": "polyhaven-industrial",
+      "name": "Industrial textures: Metal Plate, Metal Plate 02, Corrugated Iron 02, Box Profile Metal Sheet, Concrete Panels",
+      "creator": "Poly Haven",
+      "source": "https://polyhaven.com/a/metal_plate",
+      "extra_sources": [
+        "https://polyhaven.com/a/metal_plate_02",
+        "https://polyhaven.com/a/corrugated_iron_02",
+        "https://polyhaven.com/a/box_profile_metal_sheet",
+        "https://polyhaven.com/a/concrete_panels"
+      ],
+      "license": "CC0 1.0",
+      "license_url": "https://polyhaven.com/license",
+      "attribution_required": false,
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-09: polyhaven.com/license states all assets are CC0",
+      "used_for": "PBR materials for the colony's habitats, power station, oxygen plant, tanks and pads (1K, albedo/normal/AO-rough-metal)",
+      "fetch": {
+        "method": "polyhaven",
+        "slugs": [
+          "metal_plate",
+          "metal_plate_02",
+          "corrugated_iron_02",
+          "box_profile_metal_sheet",
+          "concrete_panels"
+        ],
+        "maps": [
+          "Diffuse",
+          "nor_gl",
+          "arm"
+        ],
+        "resolution": "1k",
+        "format": "jpg"
+      },
+      "dest": "PolyHaven/Industrial"
     }
   ],
   "generated": [

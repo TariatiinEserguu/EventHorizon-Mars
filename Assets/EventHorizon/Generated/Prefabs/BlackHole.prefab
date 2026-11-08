@@ -104,7 +104,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: EventHorizon.Runtime::EventHorizon.Space.BlackHole
   massSolar: 4300000
+  spin: 0
+  diskIntensity: 3
   boundRadius: 40
-  diskInner: 3
   diskOuter: 14
   steps: 300

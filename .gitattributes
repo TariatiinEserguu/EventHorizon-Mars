@@ -1,7 +1,8 @@
 # Unity YAML: merge as text
 *.unity    text merge=unityyamlmerge eol=lf
 *.prefab   text merge=unityyamlmerge eol=lf
-*.asset    text merge=unityyamlmerge eol=lf
+# .asset files are usually YAML but can be binary (TerrainData is): never convert their line endings.
+*.asset    -text merge=unityyamlmerge
 *.mat      text merge=unityyamlmerge eol=lf
 *.meta     text eol=lf
 *.cs       text diff=csharp eol=lf

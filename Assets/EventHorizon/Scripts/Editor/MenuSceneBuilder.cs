@@ -54,7 +54,6 @@ namespace EventHorizon.EditorTools
                 var body = mars.GetComponent<CelestialBody>();
                 body.kmPerUnit = 100f;
 
-                var rim = Sphere("Atmosphere", mars.transform, 1.025f, Mat("AtmosphereRim_Mars"));
                 var clouds = Sphere("Dust Clouds", mars.transform, 1.006f, Mat("Mars_DustClouds"));
                 body.clouds = clouds.transform;
                 body.cloudSpeedFactor = 1.35f;
@@ -65,7 +64,6 @@ namespace EventHorizon.EditorTools
                 var beacon = Sphere("ARES-1 Beacon", mars.transform, 0.012f, Mat("Beacon"));
                 beacon.transform.localPosition = dir * 1.004f;
                 beacon.AddComponent<BeaconPulse>();
-                rim.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
             }
 
             // Moons (shown enlarged; to scale Phobos would be a speck at this distance)
@@ -160,7 +158,8 @@ namespace EventHorizon.EditorTools
         public static void SetBuildScenes()
         {
             var list = new List<EditorBuildSettingsScene>();
-            foreach (var p in new[] { ScenePath, "Assets/EventHorizon/Scenes/MarsColony.unity", "Assets/EventHorizon/Scenes/SpaceLab.unity" })
+            foreach (var p in new[] { ScenePath, "Assets/EventHorizon/Scenes/MarsColony.unity", "Assets/EventHorizon/Scenes/SpaceLab.unity",
+                                      "Assets/EventHorizon/Scenes/MarsOrbit.unity", "Assets/EventHorizon/Scenes/BlackHoleLab.unity" })
                 if (System.IO.File.Exists(p)) list.Add(new EditorBuildSettingsScene(p, true));
             EditorBuildSettings.scenes = list.ToArray();
         }

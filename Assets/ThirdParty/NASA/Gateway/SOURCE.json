@@ -1,0 +1,13 @@
+{
+  "id": "nasa-gateway",
+  "name": "Gateway Core (3D model)",
+  "creator": "NASA",
+  "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Gateway",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Orbital research station above Mars",
+  "files": {
+    "Gateway.glb": "2817a541047a30554dc8ecf489f82235c034ad034cfa65d75546330b1dae2e05"
+  }
+}

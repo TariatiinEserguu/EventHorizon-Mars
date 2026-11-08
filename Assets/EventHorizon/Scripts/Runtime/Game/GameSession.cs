@@ -14,6 +14,8 @@ namespace EventHorizon.Game
         public const string MarsColony = "MarsColony";
         public const string SpaceLab = "SpaceLab";
         public const string GraphicsTest = "GraphicsTest";
+        public const string MarsOrbit = "MarsOrbit";
+        public const string BlackHoleLab = "BlackHoleLab";
     }
 
     /// <summary>Options on the Free Exploration screen.</summary>
@@ -146,6 +148,7 @@ namespace EventHorizon.Game
             State.playtimeSeconds = Playtime;
             Mode = GameMode.None;
             Paused = false;
+            GameInput.PointerScene = false;
             Time.timeScale = 1f;
             GameInput.ClearBlocks();
             SceneLoader.Load(Scenes.MainMenu, "Main menu");

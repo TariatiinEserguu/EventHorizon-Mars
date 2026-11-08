@@ -98,9 +98,15 @@ namespace EventHorizon.EditorTools
             if (depth != null) depth.boolValue = true;
             so.ApplyModifiedProperties();
 
+            var lightLimit = so.FindProperty("m_AdditionalLightsPerObjectLimit");
+            if (lightLimit != null) { lightLimit.intValue = 8; so.ApplyModifiedProperties(); }
             foreach (var data in urp.rendererDataList)
             {
                 if (data == null) continue;
+                // Forward+: lights are culled in screen tiles, so many floodlights don't fight over 4 slots per object.
+                var rso = new SerializedObject(data);
+                var mode = rso.FindProperty("m_RenderingMode");
+                if (mode != null && mode.intValue != 2) { mode.intValue = 2; rso.ApplyModifiedProperties(); }
                 bool has = false;
                 foreach (var f in data.rendererFeatures) has |= f is ScreenSpaceAmbientOcclusion;
                 if (has) continue;
@@ -196,7 +202,7 @@ namespace EventHorizon.EditorTools
                 dust.renderQueue = (int)RenderQueue.Transparent;
             }
 
-            var clouds = Mat("Mars_DustClouds", "Universal Render Pipeline/Unlit");
+            var clouds = Mat("Mars_DustClouds", "Universal Render Pipeline/Lit");
             if (clouds != null)
             {
                 clouds.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(SSS + "2k_earth_clouds.jpg"));

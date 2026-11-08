@@ -66,10 +66,13 @@ namespace EventHorizon.Core
             UpdateCursor();
         }
 
-        /// <summary>Cursor is free in menus, locked during play.</summary>
+        /// <summary>Set by scenes driven by the mouse rather than an astronaut (planetarium, black-hole lab).</summary>
+        public static bool PointerScene { get; set; }
+
+        /// <summary>Cursor is free in menus and pointer scenes, locked while walking around.</summary>
         public static void UpdateCursor()
         {
-            bool free = GameplayBlocked || !GameSession.InGameplay;
+            bool free = GameplayBlocked || !GameSession.InGameplay || PointerScene;
             Cursor.lockState = free ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = free;
         }

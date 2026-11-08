@@ -21,29 +21,38 @@ namespace EventHorizon.Game
                 return GameSession.Mode switch
                 {
                     GameMode.Sandbox => "FREE EXPLORATION",
-                    GameMode.Science => "SCIENCE LABORATORY",
+                    GameMode.Science => SceneTitle(),
                     _ => $"{s.chapter:00} // {Campaign.Get(s.chapter).title}",
                 };
             }
         }
 
-        public static IEnumerable<(string text, float progress, bool done)> CurrentObjectives()
+        static string SceneTitle() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name switch
+        {
+            Scenes.MarsOrbit => "MARS ORBIT",
+            Scenes.SpaceLab => "PLANETARIUM // NOT TO SCALE",
+            Scenes.BlackHoleLab => "BLACK HOLE LABORATORY",
+            _ => "SCIENCE LABORATORY",
+        };
+
+        public static IEnumerable<(string text, float progress, bool done, Vector3? waypoint)> CurrentObjectives()
         {
             if (GameSession.Mode == GameMode.Sandbox)
             {
-                yield return ("Explore the colony and Jezero crater", 0f, false);
+                yield return ("Explore the colony and Jezero crater", 0f, false, null);
                 yield break;
             }
             if (GameSession.Mode == GameMode.Science)
             {
-                yield return ("Study the simulation", 0f, false);
+                yield return ("Right-drag or arrows: orbit   Scroll: zoom", 0f, false, null);
+                yield return ("Tab or 1-9: next target   Esc: menu", 0f, false, null);
                 yield break;
             }
             var done = GameSession.State.completedObjectives;
             foreach (var o in Campaign.Get(GameSession.State.chapter).objectives)
             {
                 bool isDone = done.Contains(o.id);
-                yield return (o.text, isDone ? 1f : o.progress(), isDone);
+                yield return (o.text, isDone ? 1f : o.progress(), isDone, isDone ? null : o.waypoint?.Invoke());
             }
         }
 

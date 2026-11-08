@@ -73,17 +73,23 @@ namespace EventHorizon.Game
 
             if (env != null) env.timeScale = 0f;
             SetHour(10.5f);
-            View(new Vector3(6f, 0.2f, -20f), -10f, 2f);
+            View(new Vector3(3f, 0.2f, -16f), 8f, 3f);
             yield return Settle();
             yield return Shot("10_colony_day_first_person");
             yield return Measure("Colony, day");
 
-            View(new Vector3(40f, 0.2f, -24f), -20f, 4f);
+            View(new Vector3(30f, 0.2f, -40f), 48f, 2f);
             yield return Settle();
             yield return Shot("11_solar_field");
+            View(new Vector3(26f, 0.2f, -30f), 75f, 4f);
+            yield return Settle();
+            yield return Shot("11b_power_station");
+            View(new Vector3(-30f, 0.2f, -14f), 0f, 6f);
+            yield return Settle();
+            yield return Shot("11c_greenhouse");
 
             if (player != null) player.firstPerson = false;
-            View(new Vector3(-6f, 0.2f, -12f), 20f, 10f);
+            View(new Vector3(5f, 0.2f, -4f), 25f, 10f);
             yield return Settle();
             yield return Shot("12_third_person");
             if (player != null) player.firstPerson = true;
@@ -94,13 +100,13 @@ namespace EventHorizon.Game
             yield return Shot("13_sunset_west");
 
             SetHour(22f);
-            View(new Vector3(6f, 0.2f, -8f), -10f, 4f);
+            View(new Vector3(4f, 0.2f, 4f), -8f, 6f);
             yield return Settle();
             yield return Shot("14_night_habitat_lights");
 
             SetHour(12f);
             if (weather != null) { weather.TriggerStorm(1f, 4f); env.opticalDepth = 4f; }
-            View(new Vector3(6f, 0.2f, -20f), -10f, 2f);
+            View(new Vector3(3f, 0.2f, -16f), 8f, 3f);
             yield return Settle(2f);
             yield return Shot("15_dust_storm");
             if (weather != null && env != null) { env.opticalDepth = 0.5f; weather.TriggerStorm(0f); }
@@ -125,22 +131,54 @@ namespace EventHorizon.Game
                 pause.Resume();
             }
 
+            // Space: planetarium close-ups, Mars orbit, black-hole lab.
             GameSession.StartScience(Scenes.SpaceLab);
             yield return WaitScene(Scenes.SpaceLab, 4f);
-            yield return Shot("20_black_hole");
-            yield return Measure("Black-hole lab");
-            var orbit = FindAnyObjectByType<Space.OrbitCamera>();
-            if (orbit != null && orbit.targets.Length > 1)
+            foreach (var (target, file) in new[] { ("Earth", "20_earth"), ("Saturn", "21_saturn"), ("Jupiter", "22_jupiter"), ("Sun", "23_sun"),
+                                                   ("Psyche", "24_asteroid_belt"), ("Comet", "25_comet"), ("Moon", "26_moon") })
             {
-                orbit.targetIndex = 1;
-                orbit.distance = 120f;
-                yield return new WaitForSecondsRealtime(2.5f);
-                yield return Shot("21_mars_phobos_deimos");
+                if (Focus(target)) { yield return new WaitForSecondsRealtime(3f); yield return Shot(file); }
             }
+            yield return Measure("Planetarium");
+
+            GameSession.StartScience(Scenes.MarsOrbit);
+            yield return WaitScene(Scenes.MarsOrbit, 4f);
+            yield return Shot("30_mars_orbit");
+            foreach (var (target, file) in new[] { ("Phobos", "31_phobos"), ("Station", "32_station"), ("ARES-1", "33_landing_site") })
+            {
+                if (Focus(target)) { yield return new WaitForSecondsRealtime(3f); yield return Shot(file); }
+            }
+            yield return Measure("Mars orbit");
+
+            GameSession.StartScience(Scenes.BlackHoleLab);
+            yield return WaitScene(Scenes.BlackHoleLab, 1f);
+            var bh = FindAnyObjectByType<Space.BlackHole>();
+            var orbitCam = FindAnyObjectByType<Space.OrbitCamera>();
+            if (orbitCam != null) { orbitCam.pitch = 4f; orbitCam.yaw = 0f; orbitCam.distance = 58f; }
+            yield return new WaitForSecondsRealtime(3f);
+            yield return Shot("40_black_hole");
+            if (bh != null && orbitCam != null)
+            {
+                bh.spin = 0.95f;
+                orbitCam.distance = 42f;
+                orbitCam.pitch = 3f;
+                yield return new WaitForSecondsRealtime(3f);
+                yield return Shot("41_black_hole_close_spin");
+            }
+            yield return Measure("Black-hole lab");
 
             File.WriteAllText(Path.Combine(_dir, "performance.txt"), _report.ToString());
             Debug.Log("[Event Horizon] Screenshot run complete: " + _dir);
             Application.Quit();
+        }
+
+        static bool Focus(string name)
+        {
+            var orbit = FindAnyObjectByType<Space.OrbitCamera>();
+            if (orbit == null) return false;
+            for (int i = 0; i < orbit.targets.Length; i++)
+                if (orbit.targets[i] != null && orbit.targets[i].name.Contains(name)) { orbit.Select(i); return true; }
+            return false;
         }
 
         static IEnumerator WaitScene(string scene, float extraSeconds)

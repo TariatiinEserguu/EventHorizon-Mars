@@ -53,7 +53,7 @@ Shader "EventHorizon/AtmosphereRim"
                 float3 sunDir = normalize(GetMainLight().direction);
                 float fresnel = pow(1.0 - saturate(dot(n, viewDir)), _Power);
                 float ndl = dot(n, sunDir);
-                float lit = saturate(ndl * 1.5 + 0.35);
+                float lit = saturate(ndl * 1.5 + 0.1);
                 float twilight = saturate(1.0 - abs(ndl) * 4.0);
                 float3 col = lerp(_DayColor.rgb, _TwilightColor.rgb, twilight * 0.6) * fresnel * lit * _Intensity;
                 return half4(col, 1);

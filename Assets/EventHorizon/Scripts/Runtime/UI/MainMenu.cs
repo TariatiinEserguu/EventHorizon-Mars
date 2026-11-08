@@ -365,7 +365,9 @@ namespace EventHorizon.UI
                     Open(BuildSandbox());
                 }, danger: true), "eh-btn-danger");
             reset.SetEnabled(existing.Exists);
-            UiKit.Small(row, "BLACK HOLE LAB", () => GameSession.StartScience(Scenes.SpaceLab));
+            UiKit.Small(row, "PLANETARIUM", () => GameSession.StartScience(Scenes.SpaceLab));
+            UiKit.Small(row, "MARS ORBIT", () => GameSession.StartScience(Scenes.MarsOrbit));
+            UiKit.Small(row, "BLACK HOLE LAB", () => GameSession.StartScience(Scenes.BlackHoleLab));
             if (existing.Exists)
                 UiKit.Small(row, "CONTINUE SANDBOX", () => GameSession.StartSandbox(existing.data.sandbox ?? s, existing.data));
             UiKit.Small(row, existing.Exists ? "START FRESH" : "START", () => GameSession.StartSandbox(s), "eh-btn-primary");

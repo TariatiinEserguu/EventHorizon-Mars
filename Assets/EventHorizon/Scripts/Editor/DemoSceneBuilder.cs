@@ -85,30 +85,65 @@ namespace EventHorizon.EditorTools
             var colony = new GameObject("Colony");
             colony.AddComponent<ColonyGrid>();
             var ct = colony.transform;
-            Place("Habitat", new Vector3(0f, 0f, 18f), 180f, ct);
-            Place("Greenhouse", new Vector3(-22f, 0f, 10f), 90f, ct);
-            Place("OxygenPlant", new Vector3(12f, 0f, 4f), 0f, ct);
-            Place("WaterTank", new Vector3(16f, 0f, 9f), 0f, ct);
-            Place("OxygenTank", new Vector3(8f, 0f, 9f), 0f, ct);
-            Place("FoodStore", new Vector3(5f, 0f, 12f), 0f, ct);
-            Place("BatteryBank", new Vector3(12f, 0f, -2f), 0f, ct);
-            Place("CommsDish", new Vector3(-12f, 0f, 30f), 200f, ct);
-            for (int x = 0; x < 6; x++)
-            for (int z = 0; z < 4; z++)
-                Place("SolarPanel", new Vector3(28f + x * 5f, 0f, -10f + z * 6f), 180f, ct); // 24 x 10 m2 facing south
-            Place("Lander", new Vector3(-40f, 0f, -40f), 30f, ct);
-            Place("Rover", new Vector3(-6f, 0f, -8f), 60f, ct);
+            // Life-support district around the habitat (airlock faces the landing pad to the south).
+            Place("Habitat", new Vector3(0f, 0f, 24f), 0f, ct);
+            Place("Greenhouse", new Vector3(-30f, 0f, 6f), 90f, ct);
+            Place("OxygenPlant", new Vector3(16f, 0f, 6f), 0f, ct);
+            Place("OxygenTank", new Vector3(24f, 0f, 12f), 0f, ct);
+            Place("WaterTank", new Vector3(23f, 0f, -1f), 0f, ct);
+            Place("FoodStore", new Vector3(-12f, 0f, 16f), 90f, ct);
+            Place("CommsDish", new Vector3(-24f, 0f, 34f), 200f, ct);
 
-            // Facility terminals, each facing the walkway.
-            Terminal(TerminalType.Command, new Vector3(-4f, 0f, 9f), 180f, ct);
-            Terminal(TerminalType.Solar, new Vector3(24f, 0f, -12f), 90f, ct);
-            Terminal(TerminalType.Oxygen, new Vector3(10f, 0f, 1f), 180f, ct);
-            Terminal(TerminalType.Water, new Vector3(19f, 0f, 6f), 180f, ct);
-            Terminal(TerminalType.Greenhouse, new Vector3(-14f, 0f, 3f), 180f, ct);
+            // Power plant: a solar field of 6 x 6 tracking tables (~1,040 m2 of PV) east of the colony,
+            // with the battery/inverter station between the field and the colony.
+            Place("BatteryBank", new Vector3(40f, 0f, -22f), 90f, ct);
+            for (int x = 0; x < 6; x++)
+            for (int z = 0; z < 6; z++)
+                Place("SolarPanel", new Vector3(52f + x * 9f, 0f, -26f + z * 7f), 0f, ct);
+
+            Place("Lander", new Vector3(-42f, 0f, -42f), 30f, ct);
+            Place("Rover", new Vector3(-8f, 0f, -12f), 60f, ct);
+
+            // Sintered-regolith walkways from the pad to each facility.
+            void Walk(Vector3 a, Vector3 b)
+            {
+                var d = b - a;
+                int n = Mathf.Max(1, Mathf.RoundToInt(d.magnitude / 3.2f));
+                float yaw = Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg + 90f;
+                for (int i = 0; i <= n; i++) Place("PathSlab", Vector3.Lerp(a, b, i / (float)n), yaw, ct);
+            }
+            Walk(new Vector3(0f, 0f, -4f), new Vector3(0f, 0f, 17f));
+            Walk(new Vector3(0f, 0f, 2f), new Vector3(10f, 0f, 2f));
+            Walk(new Vector3(0f, 0f, 2f), new Vector3(-19f, 0f, 3f));
+            Walk(new Vector3(12f, 0f, 2f), new Vector3(34f, 0f, -18f));
+
+            // Facility terminals, each beside its facility, facing the walkway.
+            Terminal(TerminalType.Command, new Vector3(-3.5f, 0f, 16f), 180f, ct);
+            Terminal(TerminalType.Oxygen, new Vector3(10f, 0f, 3.5f), 270f, ct);
+            Terminal(TerminalType.Water, new Vector3(19f, 0f, -3.5f), 180f, ct);
+            Terminal(TerminalType.Solar, new Vector3(36f, 0f, -16f), 225f, ct);
+            Terminal(TerminalType.Greenhouse, new Vector3(-18f, 0f, 0.5f), 90f, ct);
 
             // Weather: dust motes around the camera, fog and occasional storms.
             var weather = new GameObject("Weather").AddComponent<DustStormSystem>();
             weather.dust = DustParticles(weather.transform);
+
+            // Sky reflections for the whole colony area.
+            var probeGo = new GameObject("Sky Reflections");
+            probeGo.transform.position = new Vector3(10f, 20f, 0f);
+            var probe = probeGo.AddComponent<ReflectionProbe>();
+            probe.size = new Vector3(600f, 200f, 600f);
+            probe.resolution = 128;
+            probe.clearFlags = ReflectionProbeClearFlags.Skybox;
+            probe.cullingMask = 0; // sky only: cheap, and no interior self-reflections
+            probeGo.AddComponent<SkyReflections>();
+
+            // Night sky: the procedural star field, fading out in daylight and dust.
+            var stars = new GameObject("Starfield").AddComponent<Space.Starfield>();
+            stars.starMaterial = AssetDatabase.LoadAssetAtPath<Material>(MatPath("Starfield"));
+            stars.galaxyMaterial = AssetDatabase.LoadAssetAtPath<Material>(MatPath("Galaxies"));
+            stars.fadeWithMarsDaylight = true;
+            stars.intensity = 0.8f;
 
             // Exploration targets beyond the pad.
             Place("Perseverance", new Vector3(140f, 0f, 90f), 220f);
@@ -128,7 +163,7 @@ namespace EventHorizon.EditorTools
             cam.nearClipPlane = 0.05f;
             cam.farClipPlane = 3000f;
             cam.gameObject.AddComponent<AudioListener>();
-            var astro = Place("Astronaut", new Vector3(0f, 0.1f, -4f));
+            var astro = Place("Astronaut", new Vector3(0f, 0.1f, -8f));
             if (astro != null)
             {
                 astro.GetComponent<AstronautController>().viewCamera = cam;

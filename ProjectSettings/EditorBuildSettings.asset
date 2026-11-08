@@ -14,4 +14,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/EventHorizon/Scenes/SpaceLab.unity
     guid: ebb454e0a8acb80d3b369c64b892cfe9
+  - enabled: 1
+    path: Assets/EventHorizon/Scenes/MarsOrbit.unity
+    guid: 070da5131b4d52c9bac73539ad3b1f0b
+  - enabled: 1
+    path: Assets/EventHorizon/Scenes/BlackHoleLab.unity
+    guid: 7d01c7e12969f89f18c72e57193fa2f8
   m_configObjects: {}

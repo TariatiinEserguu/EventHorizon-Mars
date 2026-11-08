@@ -41,9 +41,10 @@ CREDITS_TXT = ROOT / "Assets" / "EventHorizon" / "Resources" / "ThirdPartyCredit
 
 ALLOWED_EXT = {
     ".fbx", ".obj", ".mtl", ".glb", ".gltf", ".bin",
-    ".png", ".jpg", ".jpeg", ".tga", ".exr", ".hdr",
+    ".png", ".jpg", ".jpeg", ".tga", ".tif", ".tiff", ".exr", ".hdr",
     ".ogg", ".wav", ".mp3",
     ".txt", ".md",
+    ".img", ".lbl",   # NASA PDS raster + label (read by editor tools only)
 }
 
 

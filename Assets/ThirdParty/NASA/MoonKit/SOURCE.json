@@ -1,0 +1,14 @@
+{
+  "id": "nasa-svs-moon",
+  "name": "CGI Moon Kit: LRO color mosaic and LOLA elevation",
+  "creator": "NASA's Scientific Visualization Studio (Ernie Wright, Noah Petro)",
+  "source": "https://svs.gsfc.nasa.gov/4720",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Moon surface color and crater relief (normal map derived from the LOLA elevation)",
+  "files": {
+    "ldem_3_8bit.jpg": "6d93f887e7d8bedfe35ab89ba785e5e3ca12381bd092a5e6abe2c707dda8bb98",
+    "lroc_color_2k.jpg": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170"
+  }
+}

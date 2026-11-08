@@ -131,7 +131,7 @@ namespace EventHorizon.UI
             if (GameSession.Mode == GameMode.Campaign || GameSession.Mode == GameMode.None)
                 UiKit.Text(p, Campaign.Get(GameSession.State.chapter).summary, "eh-body");
             UiKit.Divider(p);
-            foreach (var (text, progress, done) in MissionTracker.CurrentObjectives())
+            foreach (var (text, progress, done, _) in MissionTracker.CurrentObjectives())
             {
                 var row = UiKit.Box(p, "eh-row");
                 row.style.marginBottom = 6;

@@ -1,0 +1,14 @@
+{
+  "id": "nasa-mola",
+  "name": "MOLA global elevation map of Mars (MEGDR, 4 pixels/degree)",
+  "creator": "NASA/GSFC Mars Orbiter Laser Altimeter team (Smith et al.), via the PDS Geosciences Node",
+  "source": "https://pds-geosciences.wustl.edu/missions/mgs/megdr.html",
+  "license": "NASA Planetary Data System (public domain)",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Real Mars relief (normal map) on the planet seen from orbit and in the menu",
+  "files": {
+    "megt90n000cb.img": "25f16fb7aaf857898dcf98bc4f841341a24f8b9f7e98453ca083bc45d897ca2c",
+    "megt90n000cb.lbl": "5a3fe60256afa1c35fea5d551fe0ab0a9198fb2bcd2c2e161d078aa69627ebac"
+  }
+}

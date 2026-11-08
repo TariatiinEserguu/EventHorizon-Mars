@@ -37,6 +37,7 @@ Material:
     - _DiskTemperature: 4300
     - _DopplerStrength: 1
     - _RotationSpeed: 0.6
+    - _Spin: 0
     - _StarExposure: 1
     - _Steps: 300
     m_Colors: []

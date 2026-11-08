@@ -32,18 +32,22 @@ Shader "EventHorizon/BlackHoleLensing"
         _DopplerStrength ("Relativistic shift amount", Range(0, 1)) = 1
         _RotationSpeed ("Disk animation speed", Float) = 0.6
         _Steps ("Max integration steps", Range(32, 600)) = 300
+        _Spin ("Spin a (approximate effect)", Range(0, 0.998)) = 0
     }
 
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "Queue" = "Geometry" }
+        // Drawn after the star field: where lensing is weak the sphere fades out and the real sky shows through,
+        // so the sphere's edge is invisible.
+        Tags { "RenderType" = "Transparent" "RenderPipeline" = "UniversalPipeline" "Queue" = "Transparent-100" }
 
         Pass
         {
             Name "BlackHole"
             Tags { "LightMode" = "UniversalForward" }
             Cull Front
-            ZWrite On
+            ZWrite Off
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
             #pragma vertex vert
@@ -66,6 +70,7 @@ Shader "EventHorizon/BlackHoleLensing"
                 float _DopplerStrength;
                 float _RotationSpeed;
                 float _Steps;
+                float _Spin;
             CBUFFER_END
 
             struct Attributes { float4 positionOS : POSITION; };
@@ -146,7 +151,8 @@ Shader "EventHorizon/BlackHoleLensing"
                 float temperature = _DiskTemperature * 1.9 * pow(max(_DiskInner / r, 1e-4), 0.75) * pow(max(1.0 - sqrt(_DiskInner / r), 1e-4), 0.25);
 
                 // Orbital speed seen by a static observer: v = sqrt(M / (r - 2M)), M = 0.5.
-                float beta = min(sqrt(0.5 / max(r - 1.0, 1e-3)), 0.99);
+                // [Approximation] spin speeds up the inner disk (frame dragging), boosting the Doppler asymmetry.
+                float beta = min(sqrt(0.5 / max(r - 1.0, 1e-3)) * (1.0 + 0.3 * _Spin * saturate(3.0 / r)), 0.99);
                 float gamma = rsqrt(1.0 - beta * beta);
                 float3 velocityDir = normalize(float3(-p.z, 0.0, p.x));
                 float cosTheta = dot(velocityDir, -rayDir); // photon travels opposite to our traced ray
@@ -176,6 +182,7 @@ Shader "EventHorizon/BlackHoleLensing"
                 }
 
                 float3 vel = dir;
+                float3 dir0 = dir;
                 float3 hv = cross(pos, vel);
                 float h2 = dot(hv, hv);
 
@@ -211,7 +218,9 @@ Shader "EventHorizon/BlackHoleLensing"
                 }
 
                 float3 bg = captured ? 0 : Background(normalize(vel));
-                return half4(colour + (1.0 - alpha) * bg, 1);
+                float deflection = acos(clamp(dot(normalize(vel), dir0), -1.0, 1.0));
+                float coverage = captured ? 1.0 : max(alpha, smoothstep(0.04, 0.22, deflection));
+                return half4(colour + (1.0 - alpha) * bg, coverage);
             }
             ENDHLSL
         }

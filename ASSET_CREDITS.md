@@ -14,7 +14,7 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 | Ultimate Crops Pack (100+ crops, 5 growth stages) | Quaternius | [quaternius.com](https://quaternius.com/packs/ultimatecrops.html) | [CC0 1.0 (as stated on the pack page)](https://creativecommons.org/publicdomain/zero/1.0/) | No | Growth-stage models for lettuce, potato, tomato, wheat and other crops (until fetched, beds use a primitive fallback) |
 | Ground textures: Red Sand, Cracked Red Ground, Red Laterite Soil Stones | Poly Haven (Rohit Seervi; Amal Kumar) | [polyhaven.com](https://polyhaven.com/a/red_sand), [more](https://polyhaven.com/a/cracked_red_ground), [more](https://polyhaven.com/a/red_laterite_soil_stones) | [CC0 1.0](https://polyhaven.com/license) | No | Mars terrain layers (tinted toward Martian regolith colour), 1K |
 | Rock Boulder Dry (texture) | Poly Haven (Dimitrios Savva, Rico Cilliers) | [polyhaven.com](https://polyhaven.com/a/rock_boulder_dry) | [CC0 1.0](https://polyhaven.com/license) | No | Texture for procedural boulders (box-projected UVs) and the steep-rock terrain layer, 1K |
-| Planet, Sun, Moon and star-field textures | Solar System Scope | [www.solarsystemscope.com](https://www.solarsystemscope.com/textures/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Yes | Mars, Earth (+clouds), Moon, Sun, Mercury, Venus, Jupiter, Saturn (+ring), Uranus, Neptune, Milky Way skybox |
+| Planet, Sun, Moon and star-field textures | Solar System Scope | [www.solarsystemscope.com](https://www.solarsystemscope.com/textures/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Yes | Mars, Earth (day, night lights, clouds, ocean specular, normal), Moon, Sun, Mercury, Venus, Jupiter, Saturn (+ring), Uranus, Neptune, Milky Way panorama |
 | Phobos and Deimos surface textures | NASA/JPL/Solar System Simulator | [science.nasa.gov](https://science.nasa.gov/3d-resources/mars-phobos/), [more](https://science.nasa.gov/3d-resources/mars-deimos/) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Textures on the procedurally generated irregular moon meshes |
 | Mars 2020 Perseverance Rover (3D model) | NASA/Jet Propulsion Laboratory | [science.nasa.gov](https://science.nasa.gov/3d-resources/mars-2020-perseverance-rover/) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Scientifically accurate landmark rover the player can inspect (not the drivable vehicle) |
 | Ingenuity Mars Helicopter (3D model) | NASA/Brian E. Kumanchik | [science.nasa.gov](https://science.nasa.gov/3d-resources/ingenuity-mars-helicopter/) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Landmark and research prop near the Perseverance site |
@@ -22,6 +22,10 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 | Deep Space Network 34-meter antenna (3D model) | NASA/JPL | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Deep%20Space%20Network%2034-meter) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Colony relay antenna (scaled down), replaces the toy satellite dish |
 | Mars Reconnaissance Orbiter (3D model) | NASA/JPL-Caltech | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Orbiter crossing the main-menu sky |
 | Rajdhani and Share Tech Mono fonts | Indian Type Foundry; Carrois Type Design | [github.com](https://github.com/google/fonts/tree/main/ofl/rajdhani), [more](https://github.com/google/fonts/tree/main/ofl/sharetechmono) | [SIL Open Font License 1.1](https://openfontlicense.org) | Yes | All interface text |
+| CGI Moon Kit: LRO color mosaic and LOLA elevation | NASA's Scientific Visualization Studio (Ernie Wright, Noah Petro) | [svs.gsfc.nasa.gov](https://svs.gsfc.nasa.gov/4720) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Moon surface color and crater relief (normal map derived from the LOLA elevation) |
+| Gateway Core (3D model) | NASA | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Gateway) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Orbital research station above Mars |
+| MOLA global elevation map of Mars (MEGDR, 4 pixels/degree) | NASA/GSFC Mars Orbiter Laser Altimeter team (Smith et al.), via the PDS Geosciences Node | [pds-geosciences.wustl.edu](https://pds-geosciences.wustl.edu/missions/mgs/megdr.html) | [NASA Planetary Data System (public domain)](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Real Mars relief (normal map) on the planet seen from orbit and in the menu |
+| Industrial textures: Metal Plate, Metal Plate 02, Corrugated Iron 02, Box Profile Metal Sheet, Concrete Panels | Poly Haven | [polyhaven.com](https://polyhaven.com/a/metal_plate), [more](https://polyhaven.com/a/metal_plate_02), [more](https://polyhaven.com/a/corrugated_iron_02), [more](https://polyhaven.com/a/box_profile_metal_sheet), [more](https://polyhaven.com/a/concrete_panels) | [CC0 1.0](https://polyhaven.com/license) | No | PBR materials for the colony's habitats, power station, oxygen plant, tanks and pads (1K, albedo/normal/AO-rough-metal) |
 
 ## Verification log
 
@@ -43,6 +47,10 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 | Deep Space Network 34-meter antenna (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply. |
 | Mars Reconnaissance Orbiter (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply. |
 | Rajdhani and Share Tech Mono fonts | Yes | Yes | 2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts. |
+| CGI Moon Kit: LRO color mosaic and LOLA elevation | Yes | Yes | 2026-11-09: SVS help page states all content is in the public domain unless otherwise noted; credit requested. |
+| Gateway Core (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply; check decals for insignia. |
+| MOLA global elevation map of Mars (MEGDR, 4 pixels/degree) | Yes | Yes | 2026-11-09: NASA PDS archival data product (US government work); credit to the MOLA team requested. |
+| Industrial textures: Metal Plate, Metal Plate 02, Corrugated Iron 02, Box Profile Metal Sheet, Concrete Panels | Yes | Yes | 2026-11-09: polyhaven.com/license states all assets are CC0 |
 
 ## Required attribution (shown in the in-game credits)
 
@@ -54,6 +62,9 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 - Deep Space Network antenna model: NASA/JPL (NASA-3D-Resources).
 - Mars Reconnaissance Orbiter model: NASA/JPL-Caltech (NASA-3D-Resources).
 - Rajdhani (Indian Type Foundry) and Share Tech Mono (Carrois Type Design), SIL Open Font License 1.1.
+- Moon color and elevation: NASA's Scientific Visualization Studio, CGI Moon Kit (LRO LROC WAC, LOLA).
+- Gateway model: NASA (NASA-3D-Resources).
+- Mars topography: MGS MOLA Team, NASA/GSFC (PDS MEGDR).
 
 In-game text: `Assets/EventHorizon/Resources/ThirdPartyCredits.txt`, read at runtime by `GameCredits.Load()`.
 

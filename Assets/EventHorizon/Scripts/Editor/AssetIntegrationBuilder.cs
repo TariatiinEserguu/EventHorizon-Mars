@@ -56,6 +56,7 @@ namespace EventHorizon.EditorTools
             BuildColonyPrefabs(crops);
             BuildTerminal();
             BuildOrbiter();
+            BuildStation();
             BuildEnvironmentPrefabs();
             BuildSpacePrefabs();
             BuildAstronaut();
@@ -262,46 +263,22 @@ namespace EventHorizon.EditorTools
 
         static void BuildColonyPrefabs(CropDefinition[] crops)
         {
-            // Solar array: no free model in the packs, so it's built from primitives. 4 x 2.5 m = 10 m^2.
-            {
-                var root = new GameObject("SolarPanel");
-                var pivot = new GameObject("Pivot").transform;
-                pivot.SetParent(root.transform, false);
-                pivot.localPosition = new Vector3(0f, 1.6f, 0f);
-                // Fixed tilt toward the equator by the site latitude (18.4 deg at Jezero) for the best year-round yield.
-                pivot.localRotation = Quaternion.Euler(18.4f, 0f, 0f);
-                Primitive(PrimitiveType.Cylinder, "Post", root.transform, new Vector3(0f, 0.8f, 0f), new Vector3(0.12f, 0.8f, 0.12f), Mat("Aluminium"));
-                var surface = Primitive(PrimitiveType.Cube, "Cells", pivot, Vector3.zero, new Vector3(4f, 0.04f, 2.5f), Mat("SolarCell")).transform;
-                Primitive(PrimitiveType.Cube, "Frame", pivot, new Vector3(0f, -0.04f, 0f), new Vector3(4.1f, 0.04f, 2.6f), Mat("Aluminium"));
-                var panel = root.AddComponent<SolarPanel>();
-                panel.surface = surface;
-                panel.trackingPivot = pivot;
-                panel.areaM2 = 10f;
-                panel.sunTracking = true; // dual-axis trackers follow the sun across the sky
-                panel.cellRenderers = new[] { surface.GetComponent<Renderer>() };
-                AddBoxCollider(root);
-                Save(root, "SolarPanel");
-                s_report.Add("SolarPanel: primitives + SolarPanel (10 m2, GaAs 29%)");
-            }
+            // Realistic procedural structures (ColonyKit) replace the low-poly placeholders.
+            ColonyKit.BuildMaterials();
+            ColonyKit.SolarTracker();
+            s_report.Add("SolarPanel: tracking table, 12 PV modules (29 m2) + SolarPanel");
+            ColonyKit.PowerStation();
+            s_report.Add("BatteryBank: power station, 2 battery containers (400 kWh), inverter, transformer + BatteryBank");
+            ColonyKit.Habitat();
+            s_report.Add("Habitat: two pressure modules, node, airlock, radiators + CrewLifeSupport");
+            ColonyKit.OxygenPlant();
+            s_report.Add("OxygenPlant: MOXIE-style skid (intake, compressor, SOXE stack) + OxygenGenerator");
+            ColonyKit.Tanks("WaterTank", ResourceType.Water, 10000f, 4000f, 2, 4.2f, "HullWhite");
+            ColonyKit.Tanks("OxygenTank", ResourceType.Oxygen, 500f, 150f, 1, 3.2f, "MLI");
+            ColonyKit.FoodStore();
+            ColonyKit.PathSlab();
+            s_report.Add("WaterTank, OxygenTank, FoodStore, PathSlab");
 
-            Machine("OxygenPlant", Kenney + "machine_generatorLarge.fbx", 3.2f, go => go.AddComponent<OxygenGenerator>(),
-                    "OxygenGenerator (SOXE CO2 electrolysis, 25 kW)");
-            Machine("WaterTank", Kenney + "machine_barrelLarge.fbx", 3f, go =>
-            {
-                var t = go.AddComponent<ResourceTank>();
-                t.resource = ResourceType.Water; t.capacityKg = 10000f; t.initialKg = 4000f;
-            }, "ResourceTank (water, 10 t)");
-            Machine("OxygenTank", Kenney + "machine_barrel.fbx", 2f, go =>
-            {
-                var t = go.AddComponent<ResourceTank>();
-                t.resource = ResourceType.Oxygen; t.capacityKg = 500f; t.initialKg = 150f;
-            }, "ResourceTank (oxygen, 500 kg; refills suits)");
-            Machine("FoodStore", Kenney + "barrels.fbx", 1.5f, go =>
-            {
-                var t = go.AddComponent<ResourceTank>();
-                t.resource = ResourceType.Food; t.capacityKg = 2000f; t.initialKg = 300f;
-            }, "ResourceTank (food, 2 t)");
-            Machine("BatteryBank", Kenney + "machine_generator.fbx", 1.8f, go => go.AddComponent<BatteryBank>(), "BatteryBank (100 kWh)");
             Machine("CommsDish", System.IO.File.Exists(Nasa + "DSN34/DSN34.glb") ? Nasa + "DSN34/DSN34.glb" : Kenney + "satelliteDish_large.fbx", 9f, go =>
             {
                 var s = go.AddComponent<ScienceInspectable>();
@@ -311,61 +288,17 @@ namespace EventHorizon.EditorTools
                           "Every 26 months the Sun sits between them and blocks contact for about two weeks.";
             }, "ScienceInspectable (light-time facts)");
 
-            // Habitat: walk-in shell with mesh colliders + crew life support.
-            {
-                var model = LoadModel(Kenney + "hangar_largeA.fbx");
-                var root = Wrap("Habitat", model, 14f, Fit.Footprint);
-                if (model == null) Primitive(PrimitiveType.Cylinder, "Shell", root.transform, new Vector3(0, 2.5f, 0), new Vector3(10, 2.5f, 10), Mat("PlanterWhite"));
-                AddMeshColliders(root);
-                root.AddComponent<CrewLifeSupport>();
-                var trigger = root.AddComponent<Game.ProximityTrigger>();
-                trigger.eventId = "reached_habitat";
-                trigger.radius = 14f;
-                trigger.message = "Habitat reached. Pressure and life support nominal.";
-                var b = WorldBounds(root);
-                foreach (float x in new[] { -0.3f, 0.3f })
-                {
-                    // Floodlights at the habitat's front corners; on at night.
-                    // The hangar's door is on its local +Z side.
-                    var lampPos = new Vector3(b.extents.x * x * 2f, b.size.y * 0.55f, b.extents.z + 0.4f);
-                    var lamp = Primitive(PrimitiveType.Cube, "Floodlight", root.transform, lampPos, new Vector3(0.5f, 0.15f, 0.2f), Mat("HabitatLamp"));
-                    var light = new GameObject("Light").AddComponent<Light>();
-                    light.transform.SetParent(lamp.transform, false);
-                    light.transform.localRotation = Quaternion.Euler(50f, 0f, 0f);
-                    light.type = LightType.Spot;
-                    light.spotAngle = 110f;
-                    light.range = 30f;
-                    light.intensity = 25f;
-                    light.color = new Color(1f, 0.86f, 0.66f);
-                    light.shadows = LightShadows.None;
-                    var night = light.gameObject.AddComponent<Core.NightLight>();
-                    night.lampRenderer = lamp.GetComponent<Renderer>();
-                }
-                Save(root, "Habitat");
-                s_report.Add($"Habitat: {Source(model, "primitive")} + CrewLifeSupport (4 crew)");
-            }
-
-            // Hydroponic bed: primitive bench + HydroponicBed.
-            {
-                var root = new GameObject("HydroponicBed");
-                Primitive(PrimitiveType.Cube, "Trough", root.transform, new Vector3(0f, 0.4f, 0f), new Vector3(2f, 0.8f, 0.8f), Mat("PlanterWhite"));
-                var bedSize = new Vector2(2f, 0.8f);
-                var bed = root.AddComponent<HydroponicBed>();
-                bed.bedSize = bedSize;
-                if (crops.Length > 0) bed.crop = crops[0];
-                AddBoxCollider(root);
-                var bedPrefab = Save(root, "HydroponicBed");
-
-                var model = LoadModel(Kenney + "hangar_roundGlass.fbx");
-                var dome = Wrap("Greenhouse", model, 14f, Fit.Footprint);
-                AddMeshColliders(dome);
-                var gh = dome.AddComponent<Greenhouse>();
-                gh.bedPrefab = bedPrefab;
-                gh.bedSize = bedSize;
-                gh.crops = crops;
-                Save(dome, "Greenhouse");
-                s_report.Add($"Greenhouse: {Source(model, "empty")} + Greenhouse (6 HydroponicBeds, {crops.Length} crops)");
-            }
+            // Hydroponic bed: a white trough with grow medium; the greenhouse lays these out.
+            var root = new GameObject("HydroponicBed");
+            Primitive(PrimitiveType.Cube, "Trough", root.transform, new Vector3(0f, 0.4f, 0f), new Vector3(2f, 0.8f, 0.8f), Mat("PlanterWhite"));
+            Primitive(PrimitiveType.Cube, "Rail", root.transform, new Vector3(0f, 0.81f, 0f), new Vector3(2.04f, 0.04f, 0.84f), Mat("Aluminium"));
+            var bed = root.AddComponent<HydroponicBed>();
+            bed.bedSize = new Vector2(2f, 0.8f);
+            if (crops.Length > 0) bed.crop = crops[0];
+            AddBoxCollider(root);
+            var bedPrefab = Save(root, "HydroponicBed");
+            ColonyKit.Greenhouse(bedPrefab, crops);
+            s_report.Add($"Greenhouse: glass dome, frame, LED bars + Greenhouse (6 beds, {crops.Length} crops)");
         }
 
         /// <summary>A free-standing control console with a glowing screen. The scene builder sets its type.</summary>
@@ -375,18 +308,21 @@ namespace EventHorizon.EditorTools
             Primitive(PrimitiveType.Cube, "Pedestal", root.transform, new Vector3(0f, 0.5f, 0f), new Vector3(0.7f, 1f, 0.45f), Mat("Aluminium"));
             var screen = Primitive(PrimitiveType.Cube, "Screen", root.transform, new Vector3(0f, 1.15f, -0.08f), new Vector3(0.66f, 0.42f, 0.04f), Mat("TerminalScreen"));
             screen.transform.localRotation = Quaternion.Euler(-20f, 0f, 0f);
-            var light = new GameObject("Glow").AddComponent<Light>();
-            light.transform.SetParent(root.transform, false);
-            light.transform.localPosition = new Vector3(0f, 1.2f, -0.5f);
-            light.type = LightType.Point;
-            light.range = 3f;
-            light.intensity = 1.5f;
-            light.color = new Color(0.4f, 0.8f, 1f);
-            light.shadows = LightShadows.None;
             AddBoxCollider(root);
             root.AddComponent<ColonyTerminal>();
             Save(root, "Terminal");
             s_report.Add("Terminal: console primitives + ColonyTerminal (type set per placement)");
+        }
+
+        /// <summary>NASA's Gateway, used as the orbital research station above Mars.</summary>
+        static void BuildStation()
+        {
+            var model = LoadModel(Nasa + "Gateway/Gateway.glb");
+            if (model == null) return;
+            var root = Wrap("Station_Gateway", model, 4f, Fit.Footprint);
+            OptimizeGlb(root, model, "Gateway");
+            Save(root, "Station_Gateway");
+            s_report.Add("Station_Gateway: NASA Gateway (orbital research station; protected wordmark painted over)");
         }
 
         /// <summary>The Mars Reconnaissance Orbiter, used in the main-menu sky.</summary>
@@ -432,26 +368,7 @@ namespace EventHorizon.EditorTools
 
             for (int i = 0; i < 4; i++) SaveMesh(Procedural.RockMeshFactory.Boulder(100 + i, i == 0 ? 2 : 1), $"Boulder_{i}");
 
-            // Spacecraft: Kenney rocket parts stacked into a crewed lander about 15 m tall.
-            var lander = new GameObject("Lander");
-            float y = 0f;
-            foreach (var part in new[] { "rocket_baseA", "rocket_fuelA", "rocket_sidesA", "rocket_topA" })
-            {
-                var m = LoadModel(Kenney + part + ".fbx");
-                if (m == null) continue;
-                var inst = (GameObject)PrefabUtility.InstantiatePrefab(m);
-                inst.transform.SetParent(lander.transform, false);
-                var b = WorldBounds(inst);
-                inst.transform.position += new Vector3(-b.center.x, y - b.min.y, -b.center.z);
-                y += b.size.y;
-            }
-            if (y > 0f) lander.transform.localScale = Vector3.one * (15f / y);
-            AddBoxCollider(lander);
-            var ls = lander.AddComponent<ScienceInspectable>();
-            ls.title = "Ascent vehicle";
-            ls.facts = "Leaving Mars takes ~4.1 km/s to reach low orbit, about half of what leaving Earth takes. " +
-                       "Methane and oxygen propellant can be made on Mars from CO2 and water ice.";
-            Save(lander, "Lander");
+            ColonyKit.Lander();
 
             bool sev = System.IO.File.Exists(Nasa + "SEV/SEV.glb");
             Landmark("Rover", sev ? Nasa + "SEV/SEV.glb" : Kenney + "rover.fbx", sev ? 6f : 4f, "Space Exploration Vehicle",
@@ -595,41 +512,13 @@ namespace EventHorizon.EditorTools
 
         static void BuildSpacePrefabs()
         {
-            var sphere = SaveMesh(Procedural.MeshBuilders.UvSphere(128, 64), "PlanetSphere");
-            foreach (var body in PlanetCatalog.All)
-            {
-                if (body.name == "Phobos" || body.name == "Deimos") continue;
-                var tex = Tex(SSS + body.texture);
-                var root = new GameObject(body.name);
-                root.AddComponent<MeshFilter>().sharedMesh = sphere;
-                var mr = root.AddComponent<MeshRenderer>();
-                mr.sharedMaterial = body.name == "Sun"
-                    ? Unlit("Planet_Sun", tex, new Color(2.5f, 2.2f, 1.8f), false)   // HDR so bloom makes it glow
-                    : Lit("Planet_" + body.name, Color.white, tex, null, body.name == "Earth" ? 0.4f : 0.1f);
-                var cb = root.AddComponent<CelestialBody>();
-                cb.Apply(body);
-                cb.meshDiameter = 2f;
-                cb.kmPerUnit = 100f;
-
-                if (body.name == "Earth" && Tex(SSS + "2k_earth_clouds.jpg") != null)
-                {
-                    var clouds = new GameObject("Clouds");
-                    clouds.transform.SetParent(root.transform, false);
-                    clouds.transform.localScale = Vector3.one * 1.01f;
-                    clouds.AddComponent<MeshFilter>().sharedMesh = sphere;
-                    clouds.AddComponent<MeshRenderer>().sharedMaterial = Unlit("Planet_EarthClouds", Tex(SSS + "2k_earth_clouds.jpg"), Color.white, true);
-                    cb.clouds = clouds.transform;
-                }
-                if (body.ringOuterKm > 0f)
-                {
-                    var ringMesh = SaveMesh(Procedural.MeshBuilders.Ring(body.ringInnerKm / body.meanRadiusKm, body.ringOuterKm / body.meanRadiusKm), body.name + "Ring");
-                    var ring = new GameObject("Ring");
-                    ring.transform.SetParent(root.transform, false);
-                    ring.AddComponent<MeshFilter>().sharedMesh = ringMesh;
-                    ring.AddComponent<MeshRenderer>().sharedMaterial = Unlit("Planet_SaturnRing", Tex(SSS + "2k_saturn_ring_alpha.png"), Color.white, true);
-                }
-                Save(root, "Planet_" + body.name);
-            }
+            SaveMesh(Procedural.MeshBuilders.UvSphere(128, 64), "PlanetSphere");
+            // Lit (not unlit) so clouds darken on the night side; brightness becomes opacity via the importer.
+            var clouds = Lit("Planet_EarthClouds", Color.white, Tex(SSS + "2k_earth_clouds.jpg"), null, 0.1f);
+            clouds.shader = Shader.Find("Universal Render Pipeline/Lit");
+            MakeTransparent(clouds);
+            clouds.SetFloat("_Cull", (float)CullMode.Back);
+            SpaceSceneBuilder.BuildPlanetPrefabs();
 
             foreach (var (preset, tex) in new[] { (IrregularMoonMesh.Preset.Phobos, "Phobos.jpg"), (IrregularMoonMesh.Preset.Deimos, "Deimos.jpg") })
             {

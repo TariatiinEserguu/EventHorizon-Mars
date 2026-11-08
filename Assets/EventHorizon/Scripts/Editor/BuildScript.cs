@@ -26,7 +26,7 @@ namespace EventHorizon.EditorTools
             if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null) ProjectBootstrap.CreatePipeline();
             AssetIntegrationBuilder.BuildAll();
             DemoSceneBuilder.BuildMarsColony();
-            DemoSceneBuilder.BuildSpaceLab();
+            SpaceSceneBuilder.BuildAll();
             MenuSceneBuilder.Build();
             MenuSceneBuilder.SetBuildScenes();
             ThirdPartyValidator.Validate();

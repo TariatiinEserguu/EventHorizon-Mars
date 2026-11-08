@@ -1,0 +1,27 @@
+{
+  "id": "polyhaven-industrial",
+  "name": "Industrial textures: Metal Plate, Metal Plate 02, Corrugated Iron 02, Box Profile Metal Sheet, Concrete Panels",
+  "creator": "Poly Haven",
+  "source": "https://polyhaven.com/a/metal_plate",
+  "license": "CC0 1.0",
+  "license_url": "https://polyhaven.com/license",
+  "attribution_required": false,
+  "used_for": "PBR materials for the colony's habitats, power station, oxygen plant, tanks and pads (1K, albedo/normal/AO-rough-metal)",
+  "files": {
+    "box_profile_metal_sheet/box_profile_metal_sheet_arm_1k.jpg": "f5bd4d7d11f3042d50dfb38bfea7af01ec00142a527a452f37090dd1c7f93bf8",
+    "box_profile_metal_sheet/box_profile_metal_sheet_diff_1k.jpg": "c2c3643bb2e07554f805f56525ec2ffbc23117be95e324af46ac98f56fa7961f",
+    "box_profile_metal_sheet/box_profile_metal_sheet_nor_gl_1k.jpg": "9cc5ca3135164dbc4eef21cf12ea488b02ce7ec252dc2b803be14eb7c3719fcb",
+    "concrete_panels/concrete_panels_arm_1k.jpg": "84f2a0dbf99628526338dee313f4eedf6ecb534e95537c9d9a7cda0085b241c5",
+    "concrete_panels/concrete_panels_diff_1k.jpg": "f7f9d5102b2daa199b42cae7d67d0b7a2977d98d80f45c302f93454224ebd140",
+    "concrete_panels/concrete_panels_nor_gl_1k.jpg": "c971054512ff5e5b7c98db866d6018160161071a730bdfee11cada2d3d5fbcb5",
+    "corrugated_iron_02/corrugated_iron_02_arm_1k.jpg": "da4197f5b3e199ef693082836ca803f9d5cad2b4998a1c1c3dc4ac384f93a890",
+    "corrugated_iron_02/corrugated_iron_02_diff_1k.jpg": "7a7b43099d015c1b08ebb175da5965caeae44b86de65a727b3fffa20a7c69a93",
+    "corrugated_iron_02/corrugated_iron_02_nor_gl_1k.jpg": "9743c93668689c36a67e9c4dc8d6a0870fe91202f82dcdaf70ddc330c12f9ecb",
+    "metal_plate/metal_plate_arm_1k.jpg": "fc4708b6700a2cc387654b693091dd0ac0cd1797ae803d75c894e62554fbef07",
+    "metal_plate/metal_plate_diff_1k.jpg": "c6b6739eac2c75ccc898e753d7833df24eafbdb9aa92fb6eabfb92abd1a680a5",
+    "metal_plate/metal_plate_nor_gl_1k.jpg": "994f851a84d52b51e97906021a1b7070ee6eac9a789fef041132268de47d8e6b",
+    "metal_plate_02/metal_plate_02_arm_1k.jpg": "e099a8385d53f4a515b7e0ce94f85d88657fcac49c23979474f5394b22dd550b",
+    "metal_plate_02/metal_plate_02_diff_1k.jpg": "6e80877d0e9d5973d96298c6091df7ace906b0a6760afc4f3592e4855f3f1d4c",
+    "metal_plate_02/metal_plate_02_nor_gl_1k.jpg": "58736fbb8aa4fc6690cf8152b174db65caf22a766375b625fb0087e1bc955bc7"
+  }
+}

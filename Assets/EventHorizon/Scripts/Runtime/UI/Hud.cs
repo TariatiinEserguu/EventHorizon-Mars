@@ -24,7 +24,11 @@ namespace EventHorizon.UI
         UIDocument _doc;
         VisualElement _root, _hud, _toasts, _info, _prompt, _compassStrip, _objectives, _top, _suitBlock;
         Label _promptLabel, _infoTitle, _infoBody, _o2Val, _intVal, _energyVal, _tempVal, _clock, _coords, _mission, _colony;
-        VisualElement _o2Fill, _intFill, _energyFill;
+        VisualElement _o2Fill, _intFill, _energyFill, _chapterFill, _marker;
+        Label _chapterLabel, _markerLabel;
+        string _objectiveSignature;
+        float _nextObjectiveRefresh;
+        Vector3? _waypoint;
         readonly List<(Label label, float angle)> _compassMarks = new();
         float _infoHideAt;
         AstronautController _player;
@@ -88,14 +92,27 @@ namespace EventHorizon.UI
             _coords.style.marginTop = 4;
 
             // Top left: mission + objectives
-            var mission = UiKit.Box(_hud, "eh-hud-block");
+            // Task panel: mission title, chapter progress, then each objective with its own progress.
+            var mission = UiKit.Box(_hud, "eh-hud-block", "eh-task-panel");
             mission.style.position = Position.Absolute;
             mission.style.left = 24;
             mission.style.top = 20;
-            mission.style.width = 420;
-            UiKit.Text(mission, "CURRENT MISSION", "eh-hud-label");
+            mission.style.width = 440;
+            var head = UiKit.Box(mission, "eh-row");
+            UiKit.Text(head, "CURRENT MISSION", "eh-hud-label");
+            UiKit.Box(head, "eh-spacer");
+            _chapterLabel = UiKit.Text(head, "", "eh-hud-label");
             _mission = UiKit.Text(mission, "", "eh-card-title");
+            var chapterBar = UiKit.Bar(mission, out _chapterFill);
+            chapterBar.style.marginTop = 4;
+            chapterBar.style.marginBottom = 6;
             _objectives = UiKit.Box(mission, "eh-col");
+
+            // Waypoint marker for the current objective.
+            _marker = UiKit.Box(_hud, "eh-marker");
+            UiKit.Box(_marker, "eh-marker-diamond");
+            _markerLabel = UiKit.Text(_marker, "", "eh-marker-label");
+            _marker.style.display = DisplayStyle.None;
 
             // Top right: clock + colony summary
             var status = UiKit.Box(_hud, "eh-hud-block");
@@ -193,14 +210,7 @@ namespace EventHorizon.UI
             if (grid != null)
                 _colony.text += $"\nPWR {grid.ProductionWatts / 1000f:0.0}/{grid.DemandWatts / 1000f:0.0} kW  BAT {grid.BatteryFraction * 100f:0}%\nO2 {grid.Amount(ResourceType.Oxygen):0} kg  H2O {grid.Amount(ResourceType.Water):0} kg  FOOD {grid.Amount(ResourceType.Food):0} kg";
 
-            // Mission
-            _mission.text = MissionTracker.CurrentTitle;
-            _objectives.Clear();
-            foreach (var (text, progress, done) in MissionTracker.CurrentObjectives())
-            {
-                var l = UiKit.Text(_objectives, $"{(done ? "[x]" : "[ ]")} {text}{(progress > 0f && progress < 1f && !done ? $"  {progress * 100f:0}%" : "")}", "eh-small");
-                if (done) l.AddToClassList("eh-ok");
-            }
+            UpdateTasks();
 
             // Compass + coordinates
             var cam = Camera.main;
@@ -224,6 +234,81 @@ namespace EventHorizon.UI
             string prompt = _interactor != null ? _interactor.CurrentPrompt : null;
             _prompt.style.display = string.IsNullOrEmpty(prompt) ? DisplayStyle.None : DisplayStyle.Flex;
             if (!string.IsNullOrEmpty(prompt)) _promptLabel.text = $"[{GameInput.DisplayBinding(GameInput.Interact)}]  {prompt}";
+        }
+
+        /// <summary>Rebuilds the task rows only when something changed (4x per second at most).</summary>
+        void UpdateTasks()
+        {
+            _mission.text = MissionTracker.CurrentTitle;
+            if (Time.unscaledTime >= _nextObjectiveRefresh)
+            {
+                _nextObjectiveRefresh = Time.unscaledTime + 0.25f;
+                var list = new List<(string text, float progress, bool done, Vector3? waypoint)>(MissionTracker.CurrentObjectives());
+                int doneCount = 0;
+                _waypoint = null;
+                int currentIndex = -1;
+                var sig = new System.Text.StringBuilder();
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list[i].done) doneCount++;
+                    else if (currentIndex < 0) { currentIndex = i; _waypoint = list[i].waypoint; }
+                    sig.Append(list[i].text).Append(list[i].done).Append(Mathf.RoundToInt(list[i].progress * 20f));
+                }
+                bool campaign = GameSession.Mode == GameMode.Campaign || GameSession.Mode == GameMode.None;
+                UiKit.SetFill(_chapterFill, list.Count > 0 && campaign ? doneCount / (float)list.Count : 0f);
+                _chapterFill.parent.style.display = campaign ? DisplayStyle.Flex : DisplayStyle.None;
+                _chapterLabel.text = campaign ? $"{doneCount}/{list.Count}" : "";
+                if (sig.ToString() != _objectiveSignature)
+                {
+                    _objectiveSignature = sig.ToString();
+                    _objectives.Clear();
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        var (text, progress, done, _) = list[i];
+                        var row = UiKit.Box(_objectives, "eh-obj-row");
+                        if (i == currentIndex) row.AddToClassList("eh-obj-row--current");
+                        UiKit.Text(row, done ? "+" : i == currentIndex ? ">" : "-", "eh-obj-icon");
+                        var col = UiKit.Box(row, "eh-col", "eh-grow");
+                        var label = UiKit.Text(col, text, "eh-small");
+                        label.style.whiteSpace = WhiteSpace.Normal;
+                        if (done) label.AddToClassList("eh-ok");
+                        if (!done && progress > 0f && progress < 1f)
+                        {
+                            var bar = UiKit.Bar(col, out var fill);
+                            bar.style.height = 4;
+                            bar.style.marginTop = 2;
+                            UiKit.SetFill(fill, progress);
+                        }
+                    }
+                }
+            }
+            UpdateMarker();
+        }
+
+        /// <summary>Places the waypoint diamond over the objective, or on the screen edge when it's off-screen.</summary>
+        void UpdateMarker()
+        {
+            var cam = Camera.main;
+            if (_waypoint == null || cam == null || _root.panel == null || _player == null)
+            {
+                _marker.style.display = DisplayStyle.None;
+                return;
+            }
+            var target = _waypoint.Value + Vector3.up * 2f;
+            float dist = Vector3.Distance(_player.transform.position, _waypoint.Value);
+            if (dist < 4f) { _marker.style.display = DisplayStyle.None; return; }
+            _marker.style.display = DisplayStyle.Flex;
+            _markerLabel.text = $"{dist:0} m";
+
+            var view = cam.WorldToViewportPoint(target);
+            bool behind = view.z < 0f;
+            if (behind) view = new Vector3(1f - view.x, 0.02f, 0f); // behind you: show at the bottom edge
+            var clamped = new Vector2(Mathf.Clamp(view.x, 0.04f, 0.96f), Mathf.Clamp(view.y, 0.06f, 0.92f));
+            var size = _root.layout.size;
+            if (float.IsNaN(size.x) || size.x <= 0f) return;
+            _marker.style.left = clamped.x * size.x - 30f;
+            _marker.style.top = (1f - clamped.y) * size.y - 10f;
+            _marker.EnableInClassList("eh-marker--edge", behind || clamped.x != view.x || clamped.y != view.y);
         }
 
         void OnDestroy()

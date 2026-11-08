@@ -38,6 +38,7 @@ namespace EventHorizon.Game
             if (FindAnyObjectByType<MissionTracker>() == null) gameObject.AddComponent<MissionTracker>();
             if (mode == GameMode.Campaign && !state.hasWorldState) ShowIntro(state);
             ApplySuitColor(state.suitColor);
+            GameInput.PointerScene = FindAnyObjectByType<AstronautController>() == null;
             GameInput.ClearBlocks();
             GameInput.UpdateCursor();
         }

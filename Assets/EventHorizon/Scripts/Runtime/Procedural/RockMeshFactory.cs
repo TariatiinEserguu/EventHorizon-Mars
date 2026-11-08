@@ -31,6 +31,50 @@ namespace EventHorizon.Procedural
             return MeshBuilders.FlatShaded(p, tris.ToArray(), $"Boulder_{seed}");
         }
 
+        /// <summary>
+        /// Smooth-shaded asteroid: an elongated, lumpy body pocked with craters (bowl plus raised rim), with
+        /// spherical UVs and tangents for a tiling rock texture and normal map. Subdivision 4 is ~5k triangles.
+        /// </summary>
+        public static Mesh Asteroid(int seed, int subdivisions = 4, float lumpiness = 0.3f)
+        {
+            MeshBuilders.Icosphere(subdivisions, out var verts, out var tris);
+            var rng = new System.Random(seed);
+            float R() => (float)rng.NextDouble();
+            var stretch = new Vector3(1f + R() * 0.8f, 0.6f + R() * 0.3f, 0.75f + R() * 0.4f);
+            int craterCount = 10 + rng.Next(20);
+            var craters = new (Vector3 dir, float size, float depth)[craterCount];
+            for (int i = 0; i < craterCount; i++)
+            {
+                var d = new Vector3(R() * 2f - 1f, R() * 2f - 1f, R() * 2f - 1f).normalized;
+                float s = Mathf.Lerp(0.08f, 0.45f, Mathf.Pow(R(), 2.5f));
+                craters[i] = (d, s, s * 0.22f);
+            }
+            var offset = new Vector3(seed * 3.1f, seed * 7.7f, seed * 1.3f);
+            var pos = new Vector3[verts.Count];
+            var uv = new Vector2[verts.Count];
+            for (int i = 0; i < verts.Count; i++)
+            {
+                var d = verts[i];
+                float h = 1f + Noise.Fbm(d * 1.4f + offset, seed, 5) * lumpiness * 2f;
+                foreach (var c in craters)
+                {
+                    float x = Vector3.Angle(d, c.dir) * Mathf.Deg2Rad / c.size;
+                    if (x < 1f) h -= c.depth * (1f - x * x);
+                    else if (x < 1.5f) h += c.depth * 0.3f * (1f - (x - 1f) * 2f);
+                }
+                pos[i] = Vector3.Scale(d * h, stretch) * 0.5f;
+                uv[i] = new Vector2(Mathf.Atan2(d.z, d.x) / (2f * Mathf.PI) + 0.5f, Mathf.Asin(Mathf.Clamp(d.y, -1f, 1f)) / Mathf.PI + 0.5f) * 3f;
+            }
+            var mesh = new Mesh { name = $"Asteroid_{seed}", indexFormat = pos.Length > 65000 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16 };
+            mesh.vertices = pos;
+            mesh.uv = uv;
+            mesh.triangles = tris.ToArray();
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+
         /// <summary>Cluster of hexagonal ice prisms with pointed tips, for subsurface ice caves and deposits.</summary>
         public static Mesh IceCluster(int seed, int crystals = 7)
         {

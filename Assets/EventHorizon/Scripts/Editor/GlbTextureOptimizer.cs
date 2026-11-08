@@ -17,6 +17,15 @@ namespace EventHorizon.EditorTools
         const string MatDir = AssetIntegrationBuilder.Out + "/Materials/Models";
         const int MaxSize = 1024;
 
+        /// <summary>
+        /// Regions to paint over while re-encoding (UV space, v up), for markings we may not use. The NASA Gateway
+        /// model's Canadarm3 texture carries the Government of Canada wordmark, a protected official mark.
+        /// </summary>
+        static readonly (string model, string texture, Rect uv, Vector2 fillFrom)[] Scrubs =
+        {
+            ("Gateway", "DSXR_BaseColor", new Rect(0f, 0.18f, 0.1f, 0.22f), new Vector2(0.13f, 0.29f)),
+        };
+
         /// <summary>glTFast only exposes pixel data when its importer is set to make textures readable.</summary>
         public static void EnsureReadable(string glbPath)
         {
@@ -100,9 +109,21 @@ namespace EventHorizon.EditorTools
                 int h = Mathf.Max(4, Mathf.RoundToInt(tex.height * scale));
                 var outTex = new Texture2D(w, h, TextureFormat.RGBA32, false);
                 var pixels = new Color[w * h];
+                Rect? scrub = null;
+                Color fill = Color.white;
+                foreach (var sc in Scrubs)
+                    if (key.Contains(sc.model) && tex.name.Contains(sc.texture))
+                    {
+                        scrub = sc.uv;
+                        fill = tex.GetPixelBilinear(sc.fillFrom.x, sc.fillFrom.y);
+                    }
                 for (int y = 0; y < h; y++)
                 for (int x = 0; x < w; x++)
-                    pixels[y * w + x] = tex.GetPixelBilinear((x + 0.5f) / w, (y + 0.5f) / h);
+                {
+                    float u = (x + 0.5f) / w, v = (y + 0.5f) / h;
+                    pixels[y * w + x] = scrub.HasValue && scrub.Value.Contains(new Vector2(u, v)) ? fill : tex.GetPixelBilinear(u, v);
+                }
+                if (scrub.HasValue) Debug.Log($"[Event Horizon] Painted over a protected mark in {key}/{tex.name}");
                 outTex.SetPixels(pixels);
                 outTex.Apply();
                 File.WriteAllBytes(path, outTex.EncodeToPNG());
