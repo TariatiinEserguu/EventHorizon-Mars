@@ -42,7 +42,7 @@ namespace EventHorizon.Colony
         {
             if (resource != ResourceType.Oxygen || _grid == null) return;
             var suit = user.GetComponentInParent<SuitLifeSupport>();
-            if (suit != null) suit.Refill(_grid);
+            if (suit != null && suit.Refill(_grid)) Game.GameEvents.Raise("suit_refilled");
         }
     }
 }

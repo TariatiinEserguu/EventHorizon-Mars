@@ -79,27 +79,6 @@ MonoBehaviour:
   mask:
     serializedVersion: 2
     m_Bits: 4294967295
-  interactAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Interact
-      m_Type: 1
-      m_ExpectedControlType: 
-      m_Id: d6caf329-258a-4196-aa80-4180dc9af496
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings:
-      - m_Name: 
-        m_Id: 45f15da5-01d9-4b69-986a-c137039ccf73
-        m_Path: <Keyboard>/e
-        m_Interactions: 
-        m_Processors: 
-        m_Groups: 
-        m_Action: Interact
-        m_Flags: 0
-      m_Flags: 0
-      m_Priority: 0
-    m_Reference: {fileID: 0}
 --- !u!114 &3864077589010167152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,8 +94,13 @@ MonoBehaviour:
   oxygenCapacityKg: 0.6
   oxygenKg: 0.6
   useKgPerHour: 0.07
+  energyCapacityWh: 1100
+  energyWh: 1100
+  baseDrawW: 90
+  integrity: 1
   insidePressurisedVolume: 0
-  showHud: 1
+  infiniteOxygen: 0
+  consumptionMultiplier: 1
 --- !u!114 &8771380440809380196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,11 +142,12 @@ MonoBehaviour:
   headBone: {fileID: 0}
   walkSpeed: 1.4
   runSpeed: 3
+  crouchSpeed: 0.7
   jumpSpeed: 2
   turnSmoothing: 10
-  lookSensitivity: 0.12
   firstPerson: 1
   eyeHeight: 1.65
+  crouchEyeDrop: 0.5
   thirdPersonPivot: {x: 0.35, y: 1.6, z: 0}
   thirdPersonDistance: 3.5
   cameraCollision:

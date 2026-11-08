@@ -11,8 +11,11 @@ namespace EventHorizon.EditorTools
     /// </summary>
     public static class BuildScript
     {
-        const string MarsScene = "Assets/EventHorizon/Scenes/MarsColony.unity";
-        const string SpaceScene = "Assets/EventHorizon/Scenes/SpaceLab.unity";
+        static string[] BuildScenes()
+        {
+            MenuSceneBuilder.SetBuildScenes();
+            return System.Array.ConvertAll(EditorBuildSettings.scenes, s => s.path);
+        }
         public const string LinuxOutput = "Builds/Linux/EventHorizonMars.x86_64";
 
         /// <summary>Builds prefabs and both scenes, validates assets, then makes a Linux player.</summary>
@@ -24,6 +27,8 @@ namespace EventHorizon.EditorTools
             AssetIntegrationBuilder.BuildAll();
             DemoSceneBuilder.BuildMarsColony();
             DemoSceneBuilder.BuildSpaceLab();
+            MenuSceneBuilder.Build();
+            MenuSceneBuilder.SetBuildScenes();
             ThirdPartyValidator.Validate();
             BuildLinux();
         }
@@ -35,7 +40,7 @@ namespace EventHorizon.EditorTools
             Directory.CreateDirectory(Path.GetDirectoryName(LinuxOutput));
             var options = new BuildPlayerOptions
             {
-                scenes = new[] { MarsScene, SpaceScene },
+                scenes = BuildScenes(),
                 locationPathName = LinuxOutput,
                 target = BuildTarget.StandaloneLinux64,
                 options = BuildOptions.None,

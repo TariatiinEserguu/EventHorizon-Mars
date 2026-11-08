@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: EventHorizon.Runtime::EventHorizon.Colony.IceDeposit
   iceKg: 2000
-  kgPerExtraction: 25
+  kgPerExtraction: 150
   purity: 0.9
   visual: {fileID: 4821387825668541709}
 --- !u!65 &8722786488711090334

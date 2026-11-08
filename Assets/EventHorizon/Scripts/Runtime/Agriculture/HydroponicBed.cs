@@ -116,6 +116,7 @@ namespace EventHorizon.Agriculture
             else if (Growth01 >= 1f)
             {
                 _grid?.Add(ResourceType.Food, HarvestKg);
+                Game.GameEvents.Raise("harvest");
                 Plant(crop); // replant immediately
             }
         }

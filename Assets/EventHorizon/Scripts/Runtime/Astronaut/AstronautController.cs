@@ -1,14 +1,13 @@
+using EventHorizon.Core;
 using EventHorizon.Interaction;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace EventHorizon.Astronaut
 {
     /// <summary>
     /// First/third-person astronaut movement in Mars gravity (3.72 m/s^2, so a 2 m/s jump rises ~0.54 m).
-    /// Works with an animated rig (Quaternius astronaut) or a static model (Kenney astronaut).
+    /// Input comes from <see cref="GameInput"/>, so rebinding and menus (which block gameplay input) just work.
     /// Animator states are played by name: Idle, Walk, Run, Jump, Interact. Missing states are skipped.
-    /// Controls: WASD / left stick, mouse / right stick, Shift run, Space jump, V switch view, Esc free cursor.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public class AstronautController : MonoBehaviour
@@ -21,43 +20,35 @@ namespace EventHorizon.Astronaut
         [Header("Movement")]
         public float walkSpeed = 1.4f;
         public float runSpeed = 3.0f;
+        public float crouchSpeed = 0.7f;
         public float jumpSpeed = 2.0f;
         public float turnSmoothing = 10f;
-        public float lookSensitivity = 0.12f;
 
         [Header("Camera")]
         public bool firstPerson = true;
         public float eyeHeight = 1.65f;
+        public float crouchEyeDrop = 0.5f;
         public Vector3 thirdPersonPivot = new Vector3(0.35f, 1.6f, 0f);
         public float thirdPersonDistance = 3.5f;
         public LayerMask cameraCollision = ~0;
 
+        public float Yaw => _yaw;
+        public bool Crouching { get; private set; }
+
         CharacterController _cc;
-        InputAction _move, _look, _run, _jump, _toggleView;
-        float _yaw, _pitch, _verticalSpeed;
+        Renderer[] _bodyRenderers;
+        bool? _bodyHidden;
+        float _yaw, _pitch, _verticalSpeed, _standHeight;
         string _state;
         Vector3 _headScale = Vector3.one;
 
         void Awake()
         {
             _cc = GetComponent<CharacterController>();
+            _standHeight = _cc.height;
             if (animator == null) animator = GetComponentInChildren<Animator>();
             _yaw = transform.eulerAngles.y;
-
-            _move = new InputAction("Move", InputActionType.Value);
-            _move.AddCompositeBinding("2DVector")
-                .With("Up", "<Keyboard>/w").With("Down", "<Keyboard>/s")
-                .With("Left", "<Keyboard>/a").With("Right", "<Keyboard>/d");
-            _move.AddBinding("<Gamepad>/leftStick");
-            _look = new InputAction("Look", InputActionType.Value, "<Mouse>/delta");
-            _look.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=12,y=12)");
-            _run = new InputAction("Run", InputActionType.Button, "<Keyboard>/leftShift");
-            _run.AddBinding("<Gamepad>/leftStickPress");
-            _jump = new InputAction("Jump", InputActionType.Button, "<Keyboard>/space");
-            _jump.AddBinding("<Gamepad>/buttonSouth");
-            _toggleView = new InputAction("ToggleView", InputActionType.Button, "<Keyboard>/v");
-            _toggleView.AddBinding("<Gamepad>/select");
-
+            firstPerson = SettingsService.Current.gameplay.firstPerson;
             var interactor = GetComponent<Interactor>();
             if (interactor != null) interactor.Interacted += _ => Play("Interact", force: true);
         }
@@ -72,42 +63,51 @@ namespace EventHorizon.Astronaut
                 if (suit != null) headBone = suit.head;
             }
             if (headBone != null) _headScale = headBone.localScale;
+            _bodyRenderers = GetComponentsInChildren<Renderer>(true);
+            GameInput.UpdateCursor();
         }
 
-        void OnEnable()
+        /// <summary>Moves the player (save loading, respawn) without the CharacterController fighting it.</summary>
+        public void Teleport(Vector3 position, float yaw)
         {
-            foreach (var a in new[] { _move, _look, _run, _jump, _toggleView }) a.Enable();
-            Cursor.lockState = CursorLockMode.Locked;
+            _cc.enabled = false;
+            transform.SetPositionAndRotation(position, Quaternion.Euler(0f, yaw, 0f));
+            _cc.enabled = true;
+            _yaw = yaw;
+            _verticalSpeed = 0f;
         }
 
-        void OnDisable()
+        /// <summary>Points the view (cutscenes, save loading, screenshot tours).</summary>
+        public void SetLook(float yaw, float pitch)
         {
-            foreach (var a in new[] { _move, _look, _run, _jump, _toggleView }) a.Disable();
-            Cursor.lockState = CursorLockMode.None;
+            _yaw = yaw;
+            _pitch = Mathf.Clamp(pitch, -80f, 80f);
+            transform.rotation = Quaternion.Euler(0f, yaw, 0f);
         }
 
         void Update()
         {
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-                Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
-            if (_toggleView.WasPressedThisFrame()) firstPerson = !firstPerson;
+            if (GameInput.ToggleView.WasPressedThisFrame()) firstPerson = !firstPerson;
 
-            if (Cursor.lockState == CursorLockMode.Locked)
-            {
-                Vector2 look = _look.ReadValue<Vector2>() * lookSensitivity;
-                _yaw += look.x;
-                _pitch = Mathf.Clamp(_pitch - look.y, -80f, 80f);
-            }
+            var controls = SettingsService.Current.controls;
+            Vector2 look = GameInput.Look.ReadValue<Vector2>() * controls.mouseSensitivity;
+            _yaw += look.x;
+            _pitch = Mathf.Clamp(_pitch + (controls.invertY ? look.y : -look.y), -80f, 80f);
 
-            Vector2 input = Vector2.ClampMagnitude(_move.ReadValue<Vector2>(), 1f);
-            bool running = _run.IsPressed();
+            Crouching = GameInput.Crouch.IsPressed();
+            _cc.height = Crouching ? _standHeight * 0.65f : _standHeight;
+            _cc.center = new Vector3(0f, _cc.height * 0.5f, 0f);
+
+            Vector2 input = Vector2.ClampMagnitude(GameInput.Move.ReadValue<Vector2>(), 1f);
+            bool running = GameInput.Run.IsPressed() && !Crouching;
+            float speed = Crouching ? crouchSpeed : running ? runSpeed : walkSpeed;
             var yawRot = Quaternion.Euler(0f, _yaw, 0f);
-            Vector3 wish = yawRot * new Vector3(input.x, 0f, input.y) * (running ? runSpeed : walkSpeed);
+            Vector3 wish = yawRot * new Vector3(input.x, 0f, input.y) * speed;
 
             if (_cc.isGrounded)
             {
                 _verticalSpeed = -0.5f; // keep contact on slopes
-                if (_jump.WasPressedThisFrame()) _verticalSpeed = jumpSpeed;
+                if (GameInput.Jump.WasPressedThisFrame() && !Crouching) _verticalSpeed = jumpSpeed;
             }
             _verticalSpeed += Physics.gravity.y * Time.deltaTime;
             _cc.Move((wish + Vector3.up * _verticalSpeed) * Time.deltaTime);
@@ -117,26 +117,35 @@ namespace EventHorizon.Astronaut
             else if (wish.sqrMagnitude > 0.01f)
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(wish), turnSmoothing * Time.deltaTime);
 
-            float speed = new Vector2(_cc.velocity.x, _cc.velocity.z).magnitude;
+            float horizontal = new Vector2(_cc.velocity.x, _cc.velocity.z).magnitude;
             if (!_cc.isGrounded && _verticalSpeed > 0.1f) Play("Jump");
             else if (_state != "Interact" || IsStateFinished())
-                Play(speed > (walkSpeed + runSpeed) * 0.5f ? "Run" : speed > 0.2f ? "Walk" : "Idle");
+                Play(horizontal > (walkSpeed + runSpeed) * 0.5f ? "Run" : horizontal > 0.2f ? "Walk" : "Idle");
         }
 
         void LateUpdate()
         {
-            if (headBone != null) headBone.localScale = firstPerson ? _headScale * 0.001f : _headScale;
+            // First person: the body renders only into shadows, so the camera never sees inside the suit
+            // and the astronaut still casts a shadow on the ground.
+            if (_bodyHidden != firstPerson && _bodyRenderers != null)
+            {
+                foreach (var r in _bodyRenderers)
+                    if (r != null) r.shadowCastingMode = firstPerson ? UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly : UnityEngine.Rendering.ShadowCastingMode.On;
+                _bodyHidden = firstPerson;
+            }
             if (viewCamera == null) return;
 
             var lookRot = Quaternion.Euler(_pitch, _yaw, 0f);
             if (firstPerson)
             {
                 Vector3 eye = headBone != null ? headBone.position : transform.position + Vector3.up * eyeHeight;
+                if (Crouching && headBone == null) eye -= Vector3.up * crouchEyeDrop;
                 viewCamera.transform.SetPositionAndRotation(eye + Quaternion.Euler(0f, _yaw, 0f) * Vector3.forward * 0.12f, lookRot);
             }
             else
             {
                 Vector3 pivot = transform.position + Quaternion.Euler(0f, _yaw, 0f) * thirdPersonPivot;
+                if (Crouching) pivot -= Vector3.up * crouchEyeDrop;
                 Vector3 back = lookRot * Vector3.back;
                 float dist = thirdPersonDistance;
                 if (Physics.SphereCast(pivot, 0.2f, back, out var hit, dist, cameraCollision, QueryTriggerInteraction.Ignore)

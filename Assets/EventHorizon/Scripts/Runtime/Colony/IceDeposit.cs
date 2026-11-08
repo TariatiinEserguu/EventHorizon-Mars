@@ -10,7 +10,8 @@ namespace EventHorizon.Colony
     public class IceDeposit : MonoBehaviour, IInteractable
     {
         [Min(0f)] public float iceKg = 2000f;
-        public float kgPerExtraction = 25f;
+        [Tooltip("Ice dug per use: one powered-drill session, not a shovelful.")]
+        public float kgPerExtraction = 150f;
         [Range(0f, 1f)] public float purity = 0.9f;
         [Tooltip("Shrinks the visible formation as it is mined.")]
         public Transform visual;
@@ -37,6 +38,7 @@ namespace EventHorizon.Colony
             // Only remove ice that actually fit in the tanks.
             iceKg -= purity > 0f ? stored / purity : dug;
             visual.localScale = _startScale * Mathf.Lerp(0.3f, 1f, Mathf.Sqrt(iceKg / _startKg));
+            Game.GameEvents.Raise("ice_extracted");
             if (iceKg <= 0f) visual.gameObject.SetActive(false);
         }
     }

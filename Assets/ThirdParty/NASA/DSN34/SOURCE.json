@@ -1,0 +1,13 @@
+{
+  "id": "nasa-dsn34",
+  "name": "Deep Space Network 34-meter antenna (3D model)",
+  "creator": "NASA/JPL",
+  "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Deep%20Space%20Network%2034-meter",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Colony relay antenna (scaled down), replaces the toy satellite dish",
+  "files": {
+    "DSN34.glb": "7a4b71f14da463fb70b5da7757c99fb8868a1f0d82f4c28cf3d57019f051a806"
+  }
+}

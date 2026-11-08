@@ -69,7 +69,11 @@ namespace EventHorizon.Colony
 
         public string Prompt => $"{(running ? "Stop" : "Start")} oxygen plant ({OutputKgPerHour * 1000f:0} g/h)";
         public bool CanInteract(GameObject user) => true;
-        public void Interact(GameObject user) => running = !running;
+        public void Interact(GameObject user)
+        {
+            running = !running;
+            Game.GameEvents.Raise("oxygen_toggled");
+        }
 
         /// <summary>Sets the MOXIE values from the Perseverance rover's experiment.</summary>
         [ContextMenu("Preset: MOXIE (300 W, ~6 g/h)")]

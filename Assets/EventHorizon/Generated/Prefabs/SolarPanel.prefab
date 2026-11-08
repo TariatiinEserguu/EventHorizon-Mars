@@ -352,12 +352,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: EventHorizon.Runtime::EventHorizon.Colony.SolarPanel
   surface: {fileID: 4507499466362330766}
   trackingPivot: {fileID: 7143210605858828034}
-  sunTracking: 0
+  sunTracking: 1
   areaM2: 10
   cellEfficiency: 0.29
   systemLosses: 0.1
   dustCoverage: 0
   dustPerSol: 0.0028
+  cellRenderers:
+  - {fileID: 6058378778537157892}
+  cleanColor: {r: 0.05, g: 0.08, b: 0.2, a: 1}
+  dustColor: {r: 0.62, g: 0.42, b: 0.28, a: 1}
 --- !u!65 &6975466872758539254
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -63,6 +63,50 @@ namespace EventHorizon.Colony
 
         public string Prompt => $"Clean solar panel ({CurrentWatts:0} W, {dustCoverage:P0} dust)";
         public bool CanInteract(GameObject user) => dustCoverage > 0.01f;
-        public void Interact(GameObject user) => dustCoverage = 0f;
+
+        public void Interact(GameObject user)
+        {
+            Clean();
+            Game.GameEvents.Raise("panel_cleaned");
+        }
+
+        public void Clean()
+        {
+            dustCoverage = 0f;
+            UpdateDustVisual();
+        }
+
+        [Header("Dust visual")]
+        [Tooltip("Renderers of the cell surface, tinted toward dust colour as dust builds up.")]
+        public Renderer[] cellRenderers = new Renderer[0];
+        public Color cleanColor = new Color(0.05f, 0.08f, 0.2f);
+        public Color dustColor = new Color(0.62f, 0.42f, 0.28f);
+
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        static readonly int SmoothnessId = Shader.PropertyToID("_Smoothness");
+        MaterialPropertyBlock _mpb;
+        float _shownDust = -1f;
+
+        void LateUpdate()
+        {
+            if (Mathf.Abs(dustCoverage - _shownDust) > 0.01f) UpdateDustVisual();
+        }
+
+        void UpdateDustVisual()
+        {
+            _shownDust = dustCoverage;
+            if (cellRenderers == null || cellRenderers.Length == 0) return;
+            _mpb ??= new MaterialPropertyBlock();
+            // Dust settles as a matte layer: colour shifts toward regolith and the glass stops reflecting.
+            float d = Mathf.Sqrt(dustCoverage);
+            foreach (var r in cellRenderers)
+            {
+                if (r == null) continue;
+                r.GetPropertyBlock(_mpb);
+                _mpb.SetColor(BaseColorId, Color.Lerp(cleanColor, dustColor, d));
+                _mpb.SetFloat(SmoothnessId, Mathf.Lerp(0.9f, 0.15f, d));
+                r.SetPropertyBlock(_mpb);
+            }
+        }
     }
 }

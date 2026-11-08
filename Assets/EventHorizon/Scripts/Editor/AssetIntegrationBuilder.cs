@@ -47,12 +47,15 @@ namespace EventHorizon.EditorTools
         public static void BuildAll()
         {
             s_report.Clear();
+            VisualSetup.SetupAll();
             foreach (var d in new[] { MatDir, MeshDir, PrefabDir, CropDir, TerrainDir, AnimDir }) Directory.CreateDirectory(d);
             AssetDatabase.Refresh();
 
             BuildMaterials();
             var crops = BuildCrops();
             BuildColonyPrefabs(crops);
+            BuildTerminal();
+            BuildOrbiter();
             BuildEnvironmentPrefabs();
             BuildSpacePrefabs();
             BuildAstronaut();
@@ -166,6 +169,14 @@ namespace EventHorizon.EditorTools
                     AssetDatabase.CreateAsset(bh, $"{MatDir}/BlackHole.mat");
                 }
                 if (stars != null) bh.SetTexture("_StarTex", stars);
+                // Set explicitly: an existing material keeps old values even when the shader defaults change.
+                bh.SetFloat("_DiskTemperature", 4300f);
+                bh.SetFloat("_DiskBrightness", 3f);
+                bh.SetFloat("_DiskInner", 3f);
+                bh.SetFloat("_DiskOuter", 14f);
+                bh.SetFloat("_RotationSpeed", 0.6f);
+                bh.SetFloat("_StarExposure", 1f);
+                EditorUtility.SetDirty(bh);
             }
             s_report.Add("materials: rock, ice, solar cell, Mars sky, star sky, black hole");
         }
@@ -174,7 +185,17 @@ namespace EventHorizon.EditorTools
 
         enum Fit { Height, Footprint }
 
-        static GameObject LoadModel(string path) => AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        static GameObject LoadModel(string path)
+        {
+            if (path.EndsWith(".glb")) GlbTextureOptimizer.EnsureReadable(path);
+            return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        }
+
+        /// <summary>Compressed, size-capped copies of a .glb model's embedded textures (see GlbTextureOptimizer).</summary>
+        static void OptimizeGlb(GameObject root, GameObject model, string key)
+        {
+            if (model != null && AssetDatabase.GetAssetPath(model).EndsWith(".glb")) GlbTextureOptimizer.Optimize(root, key);
+        }
 
         static Bounds WorldBounds(GameObject go)
         {
@@ -256,6 +277,8 @@ namespace EventHorizon.EditorTools
                 panel.surface = surface;
                 panel.trackingPivot = pivot;
                 panel.areaM2 = 10f;
+                panel.sunTracking = true; // dual-axis trackers follow the sun across the sky
+                panel.cellRenderers = new[] { surface.GetComponent<Renderer>() };
                 AddBoxCollider(root);
                 Save(root, "SolarPanel");
                 s_report.Add("SolarPanel: primitives + SolarPanel (10 m2, GaAs 29%)");
@@ -279,9 +302,10 @@ namespace EventHorizon.EditorTools
                 t.resource = ResourceType.Food; t.capacityKg = 2000f; t.initialKg = 300f;
             }, "ResourceTank (food, 2 t)");
             Machine("BatteryBank", Kenney + "machine_generator.fbx", 1.8f, go => go.AddComponent<BatteryBank>(), "BatteryBank (100 kWh)");
-            Machine("CommsDish", Kenney + "satelliteDish_large.fbx", 6f, go =>
+            Machine("CommsDish", System.IO.File.Exists(Nasa + "DSN34/DSN34.glb") ? Nasa + "DSN34/DSN34.glb" : Kenney + "satelliteDish_large.fbx", 9f, go =>
             {
                 var s = go.AddComponent<ScienceInspectable>();
+                s.eventId = "inspect_relay";
                 s.title = "Relay dish";
                 s.facts = "Radio signals take 3 to 22 minutes to cross between Mars and Earth, depending on where the planets are. " +
                           "Every 26 months the Sun sits between them and blocks contact for about two weeks.";
@@ -294,6 +318,29 @@ namespace EventHorizon.EditorTools
                 if (model == null) Primitive(PrimitiveType.Cylinder, "Shell", root.transform, new Vector3(0, 2.5f, 0), new Vector3(10, 2.5f, 10), Mat("PlanterWhite"));
                 AddMeshColliders(root);
                 root.AddComponent<CrewLifeSupport>();
+                var trigger = root.AddComponent<Game.ProximityTrigger>();
+                trigger.eventId = "reached_habitat";
+                trigger.radius = 14f;
+                trigger.message = "Habitat reached. Pressure and life support nominal.";
+                var b = WorldBounds(root);
+                foreach (float x in new[] { -0.3f, 0.3f })
+                {
+                    // Floodlights at the habitat's front corners; on at night.
+                    // The hangar's door is on its local +Z side.
+                    var lampPos = new Vector3(b.extents.x * x * 2f, b.size.y * 0.55f, b.extents.z + 0.4f);
+                    var lamp = Primitive(PrimitiveType.Cube, "Floodlight", root.transform, lampPos, new Vector3(0.5f, 0.15f, 0.2f), Mat("HabitatLamp"));
+                    var light = new GameObject("Light").AddComponent<Light>();
+                    light.transform.SetParent(lamp.transform, false);
+                    light.transform.localRotation = Quaternion.Euler(50f, 0f, 0f);
+                    light.type = LightType.Spot;
+                    light.spotAngle = 110f;
+                    light.range = 30f;
+                    light.intensity = 25f;
+                    light.color = new Color(1f, 0.86f, 0.66f);
+                    light.shadows = LightShadows.None;
+                    var night = light.gameObject.AddComponent<Core.NightLight>();
+                    night.lampRenderer = lamp.GetComponent<Renderer>();
+                }
                 Save(root, "Habitat");
                 s_report.Add($"Habitat: {Source(model, "primitive")} + CrewLifeSupport (4 crew)");
             }
@@ -321,10 +368,43 @@ namespace EventHorizon.EditorTools
             }
         }
 
+        /// <summary>A free-standing control console with a glowing screen. The scene builder sets its type.</summary>
+        static void BuildTerminal()
+        {
+            var root = new GameObject("Terminal");
+            Primitive(PrimitiveType.Cube, "Pedestal", root.transform, new Vector3(0f, 0.5f, 0f), new Vector3(0.7f, 1f, 0.45f), Mat("Aluminium"));
+            var screen = Primitive(PrimitiveType.Cube, "Screen", root.transform, new Vector3(0f, 1.15f, -0.08f), new Vector3(0.66f, 0.42f, 0.04f), Mat("TerminalScreen"));
+            screen.transform.localRotation = Quaternion.Euler(-20f, 0f, 0f);
+            var light = new GameObject("Glow").AddComponent<Light>();
+            light.transform.SetParent(root.transform, false);
+            light.transform.localPosition = new Vector3(0f, 1.2f, -0.5f);
+            light.type = LightType.Point;
+            light.range = 3f;
+            light.intensity = 1.5f;
+            light.color = new Color(0.4f, 0.8f, 1f);
+            light.shadows = LightShadows.None;
+            AddBoxCollider(root);
+            root.AddComponent<ColonyTerminal>();
+            Save(root, "Terminal");
+            s_report.Add("Terminal: console primitives + ColonyTerminal (type set per placement)");
+        }
+
+        /// <summary>The Mars Reconnaissance Orbiter, used in the main-menu sky.</summary>
+        static void BuildOrbiter()
+        {
+            var model = LoadModel(Nasa + "MRO/MRO.glb");
+            if (model == null) return;
+            var root = Wrap("Orbiter_MRO", model, 9f, Fit.Footprint);
+            OptimizeGlb(root, model, "MRO");
+            Save(root, "Orbiter_MRO");
+            s_report.Add("Orbiter_MRO: NASA Mars Reconnaissance Orbiter (menu sky)");
+        }
+
         static void Machine(string name, string modelPath, float height, System.Action<GameObject> addComponents, string what)
         {
             var model = LoadModel(modelPath);
             var root = Wrap(name, model, height, Fit.Height);
+            OptimizeGlb(root, model, name);
             if (model == null)
                 Primitive(PrimitiveType.Cylinder, "Body", root.transform, new Vector3(0, height * 0.5f, 0), new Vector3(1.5f, height * 0.5f, 1.5f), Mat("Aluminium"));
             AddBoxCollider(root);
@@ -373,10 +453,12 @@ namespace EventHorizon.EditorTools
                        "Methane and oxygen propellant can be made on Mars from CO2 and water ice.";
             Save(lander, "Lander");
 
-            Landmark("Rover", Kenney + "rover.fbx", 4f, "Exploration rover",
-                     "Pressurised rovers would let crews drive tens of kilometres from base. Nothing is more than " +
-                     "a walk back away without one: plan oxygen for the return trip.");
+            bool sev = System.IO.File.Exists(Nasa + "SEV/SEV.glb");
+            Landmark("Rover", sev ? Nasa + "SEV/SEV.glb" : Kenney + "rover.fbx", sev ? 6f : 4f, "Space Exploration Vehicle",
+                     "NASA's SEV concept: a pressurised rover that two astronauts can live in for up to two weeks, " +
+                     "with suit ports on the back so they can step out without an airlock.");
             Landmark("Perseverance", Nasa + "Perseverance/Perseverance.glb", 3f, "Mars 2020 Perseverance Rover", null);
+            // (eventId defaults to "inspect"; objectives can count landmark visits)
             Landmark("Ingenuity", Nasa + "Ingenuity/Ingenuity.glb", 1.2f, "Ingenuity Mars Helicopter",
                      "First powered flight on another planet (19 Apr 2021). The air is ~1% as dense as Earth's, so its " +
                      "1.2 m rotors spun at about 2,400 rpm. It flew 72 times.");
@@ -392,6 +474,7 @@ namespace EventHorizon.EditorTools
                 return;
             }
             var root = Wrap(name, model, size, Fit.Footprint);
+            OptimizeGlb(root, model, name);
             AddBoxCollider(root);
             var s = root.AddComponent<ScienceInspectable>();
             s.title = title;
@@ -568,7 +651,7 @@ namespace EventHorizon.EditorTools
                 bh.GetComponent<MeshRenderer>().sharedMaterial = bhMat;
                 bh.GetComponent<MeshRenderer>().shadowCastingMode = ShadowCastingMode.Off;
                 bh.AddComponent<BlackHole>();
-                bh.transform.localScale = Vector3.one * 40f;
+                bh.transform.localScale = Vector3.one * 100f; // r_s = 1.25 units; disk spans ~35 units
                 Save(bh, "BlackHole");
             }
             s_report.Add("Planets (Sun..Neptune, Earth clouds, Saturn ring), Phobos + Deimos (procedural), BlackHole");

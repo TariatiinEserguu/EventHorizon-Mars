@@ -296,6 +296,90 @@
         }
       },
       "dest": "NASA/Ingenuity"
+    },
+    {
+      "id": "nasa-sev",
+      "name": "Space Exploration Vehicle (3D model)",
+      "creator": "NASA",
+      "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Exploration%20Vehicle",
+      "attribution_text": "Space Exploration Vehicle model: NASA (NASA-3D-Resources).",
+      "verified": "2026-11-09: official NASA GitHub repository of 3D resources; preview shows no NASA insignia. NASA media terms apply.",
+      "used_for": "Pressurized exploration rover parked at the colony (replaces the toy rover)",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "SEV.glb": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Space%20Exploration%20Vehicle/Space%20Exploration%20Vehicle.glb"
+        }
+      },
+      "dest": "NASA/SEV",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "nasa-dsn34",
+      "name": "Deep Space Network 34-meter antenna (3D model)",
+      "creator": "NASA/JPL",
+      "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Deep%20Space%20Network%2034-meter",
+      "attribution_text": "Deep Space Network antenna model: NASA/JPL (NASA-3D-Resources).",
+      "verified": "2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply.",
+      "used_for": "Colony relay antenna (scaled down), replaces the toy satellite dish",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "DSN34.glb": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Deep%20Space%20Network%2034-meter/Deep%20Space%20Network%2034-meter.glb"
+        }
+      },
+      "dest": "NASA/DSN34",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "nasa-mro",
+      "name": "Mars Reconnaissance Orbiter (3D model)",
+      "creator": "NASA/JPL-Caltech",
+      "source": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)",
+      "attribution_text": "Mars Reconnaissance Orbiter model: NASA/JPL-Caltech (NASA-3D-Resources).",
+      "verified": "2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply.",
+      "used_for": "Orbiter crossing the main-menu sky",
+      "fetch": {
+        "method": "direct",
+        "files": {
+          "MRO.glb": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A).glb"
+        }
+      },
+      "dest": "NASA/MRO",
+      "license": "NASA Media Usage Guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "attribution_required": true,
+      "commercial_use": true,
+      "modification": true
+    },
+    {
+      "id": "fonts-ofl",
+      "name": "Rajdhani and Share Tech Mono fonts",
+      "creator": "Indian Type Foundry; Carrois Type Design",
+      "source": "https://github.com/google/fonts/tree/main/ofl/rajdhani",
+      "extra_sources": [
+        "https://github.com/google/fonts/tree/main/ofl/sharetechmono"
+      ],
+      "license": "SIL Open Font License 1.1",
+      "license_url": "https://openfontlicense.org",
+      "attribution_required": true,
+      "attribution_text": "Rajdhani (Indian Type Foundry) and Share Tech Mono (Carrois Type Design), SIL Open Font License 1.1.",
+      "commercial_use": true,
+      "modification": true,
+      "verified": "2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts.",
+      "used_for": "All interface text",
+      "fetch": {
+        "method": "bundled"
+      },
+      "dest": "../EventHorizon/Fonts"
     }
   ],
   "generated": [

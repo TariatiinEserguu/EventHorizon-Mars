@@ -34,7 +34,7 @@ Material:
     - _DiskInner: 3
     - _DiskOpacity: 0.9
     - _DiskOuter: 14
-    - _DiskTemperature: 8000
+    - _DiskTemperature: 4300
     - _DopplerStrength: 1
     - _RotationSpeed: 0.6
     - _StarExposure: 1

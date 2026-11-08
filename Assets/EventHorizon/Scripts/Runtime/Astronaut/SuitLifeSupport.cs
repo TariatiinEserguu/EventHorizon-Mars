@@ -5,43 +5,56 @@ using UnityEngine;
 namespace EventHorizon.Astronaut
 {
     /// <summary>
-    /// Oxygen in the backpack (PLSS). Sized like NASA's EMU suit: ~0.6 kg of O2, used at ~0.07 kg/h during
-    /// active EVA work, so about 8 hours outside. Refill at any oxygen <see cref="ResourceTank"/>.
+    /// The backpack (PLSS). Oxygen is sized like NASA's EMU suit: ~0.6 kg of O2 used at ~0.07 kg/h during active EVA
+    /// work, so about 8 hours outside. Energy is the suit battery (heating, fans, radio). Integrity drops slowly
+    /// while dust storms sandblast the suit. Refill oxygen at any oxygen <see cref="ResourceTank"/>.
     /// </summary>
     public class SuitLifeSupport : MonoBehaviour
     {
         public float oxygenCapacityKg = 0.6f;
         public float oxygenKg = 0.6f;
         public float useKgPerHour = 0.07f;
-        [Tooltip("Set by habitat/airlock triggers: no suit oxygen is used inside.")]
+        [Tooltip("Suit battery, Wh. The EMU's battery is ~1.1 kWh.")]
+        public float energyCapacityWh = 1100f;
+        public float energyWh = 1100f;
+        [Tooltip("Average draw: heaters, fans, pump, radio, lights. More when it is very cold.")]
+        public float baseDrawW = 90f;
+        [Range(0f, 1f)] public float integrity = 1f;
+        [Tooltip("Set by habitat/airlock triggers: no suit consumables are used inside.")]
         public bool insidePressurisedVolume;
-        public bool showHud = true;
+        public bool infiniteOxygen;
+        /// <summary>Difficulty multiplier on oxygen use.</summary>
+        public float consumptionMultiplier = 1f;
 
-        public float HoursLeft => useKgPerHour > 0f ? oxygenKg / useKgPerHour : float.PositiveInfinity;
+        public float HoursLeft => useKgPerHour > 0f ? oxygenKg / (useKgPerHour * consumptionMultiplier) : float.PositiveInfinity;
+        public float OxygenFraction => oxygenCapacityKg > 0f ? oxygenKg / oxygenCapacityKg : 0f;
+        public float EnergyFraction => energyCapacityWh > 0f ? energyWh / energyCapacityWh : 0f;
         public bool OutOfOxygen => oxygenKg <= 0f;
 
         void Update()
         {
-            if (insidePressurisedVolume) return;
-            oxygenKg = Mathf.Max(0f, oxygenKg - useKgPerHour * MarsEnvironment.DeltaSeconds / 3600f);
+            if (insidePressurisedVolume || infiniteOxygen) return;
+            float hours = MarsEnvironment.DeltaSeconds / 3600f;
+            oxygenKg = Mathf.Max(0f, oxygenKg - useKgPerHour * consumptionMultiplier * hours);
+
+            var env = MarsEnvironment.Instance;
+            float cold = env != null ? Mathf.Clamp01((-20f - env.SurfaceTemperatureC) / 60f) : 0f;
+            energyWh = Mathf.Max(0f, energyWh - baseDrawW * (1f + cold) * hours);
+            if (env != null && env.opticalDepth > 2f)
+                integrity = Mathf.Max(0f, integrity - 0.02f * (env.opticalDepth - 2f) * hours);
         }
 
-        /// <summary>Tops up the suit from the colony's oxygen stock.</summary>
-        public void Refill(ColonyGrid grid)
+        /// <summary>Tops up oxygen from the colony stock and recharges the battery. Returns true if anything was added.</summary>
+        public bool Refill(ColonyGrid grid)
         {
-            oxygenKg += grid.Take(ResourceType.Oxygen, oxygenCapacityKg - oxygenKg);
+            float need = oxygenCapacityKg - oxygenKg;
+            float got = grid.Take(ResourceType.Oxygen, need);
+            oxygenKg += got;
+            bool charged = energyWh < energyCapacityWh - 1f;
+            energyWh = energyCapacityWh;
+            return got > 0.0001f || charged;
         }
 
-        void OnGUI()
-        {
-            if (!showHud) return;
-            float f = oxygenCapacityKg > 0f ? oxygenKg / oxygenCapacityKg : 0f;
-            var r = new Rect(20, Screen.height - 50, 220, 22);
-            GUI.Box(r, GUIContent.none);
-            GUI.color = f > 0.25f ? Color.cyan : Color.red;
-            GUI.Box(new Rect(r.x + 2, r.y + 2, (r.width - 4) * f, r.height - 4), GUIContent.none);
-            GUI.color = Color.white;
-            GUI.Label(new Rect(r.x + 6, r.y + 2, r.width, r.height), $"Suit O2 {oxygenKg:0.00} kg  ({HoursLeft:0.0} h)");
-        }
+        public void Repair() => integrity = 1f;
     }
 }

@@ -197,6 +197,8 @@ FETCHERS = {
 
 
 def fetch_asset(asset: dict, manifest: dict, force: bool) -> str:
+    if asset["fetch"]["method"] == "bundled":
+        return "bundled in the repository (nothing to download)"
     dest = ROOT / manifest["thirdparty_root"] / asset["dest"]
     marker = dest / "SOURCE.json"
     if not force and is_complete(marker):
@@ -239,6 +241,8 @@ def is_complete(marker: Path) -> bool:
 
 def register_manual_folder(asset: dict, manifest: dict) -> str | None:
     """Writes SOURCE.json for a folder the user filled by hand."""
+    if asset["fetch"]["method"] == "bundled":
+        return None
     dest = ROOT / manifest["thirdparty_root"] / asset["dest"]
     if (dest / "SOURCE.json").exists() or not dest.exists():
         return None

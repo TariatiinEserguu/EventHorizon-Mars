@@ -50,10 +50,13 @@ namespace EventHorizon.EditorTools
             var env = new GameObject("Mars Environment").AddComponent<MarsEnvironment>();
             env.sun = sun;
 
-            var sky = AssetDatabase.LoadAssetAtPath<Material>(MatPath("Sky_Mars"));
+            var sky = AssetDatabase.LoadAssetAtPath<Material>(MatPath("Sky_MarsDynamic"))
+                      ?? AssetDatabase.LoadAssetAtPath<Material>(MatPath("Sky_Mars"));
             if (sky != null) RenderSettings.skybox = sky;
             RenderSettings.sun = sun;
-            RenderSettings.ambientMode = AmbientMode.Skybox;
+            RenderSettings.ambientMode = AmbientMode.Trilight; // driven by MarsEnvironment through the day
+            VisualSetup.AddGlobalVolume();
+            new GameObject("Session").AddComponent<Game.SessionBootstrap>();
             RenderSettings.fog = true; // suspended dust
             RenderSettings.fogMode = FogMode.ExponentialSquared;
             RenderSettings.fogColor = new Color(0.78f, 0.58f, 0.42f);
@@ -81,7 +84,6 @@ namespace EventHorizon.EditorTools
             // Colony on the flattened pad.
             var colony = new GameObject("Colony");
             colony.AddComponent<ColonyGrid>();
-            colony.AddComponent<ColonyStatusHUD>();
             var ct = colony.transform;
             Place("Habitat", new Vector3(0f, 0f, 18f), 180f, ct);
             Place("Greenhouse", new Vector3(-22f, 0f, 10f), 90f, ct);
@@ -96,6 +98,17 @@ namespace EventHorizon.EditorTools
                 Place("SolarPanel", new Vector3(28f + x * 5f, 0f, -10f + z * 6f), 180f, ct); // 24 x 10 m2 facing south
             Place("Lander", new Vector3(-40f, 0f, -40f), 30f, ct);
             Place("Rover", new Vector3(-6f, 0f, -8f), 60f, ct);
+
+            // Facility terminals, each facing the walkway.
+            Terminal(TerminalType.Command, new Vector3(-4f, 0f, 9f), 180f, ct);
+            Terminal(TerminalType.Solar, new Vector3(24f, 0f, -12f), 90f, ct);
+            Terminal(TerminalType.Oxygen, new Vector3(10f, 0f, 1f), 180f, ct);
+            Terminal(TerminalType.Water, new Vector3(19f, 0f, 6f), 180f, ct);
+            Terminal(TerminalType.Greenhouse, new Vector3(-14f, 0f, 3f), 180f, ct);
+
+            // Weather: dust motes around the camera, fog and occasional storms.
+            var weather = new GameObject("Weather").AddComponent<DustStormSystem>();
+            weather.dust = DustParticles(weather.transform);
 
             // Exploration targets beyond the pad.
             Place("Perseverance", new Vector3(140f, 0f, 90f), 220f);
@@ -153,17 +166,28 @@ namespace EventHorizon.EditorTools
             Place("BlackHole", Vector3.zero);
             // Showcase, not to scale: at Mars' 100 km/unit, Phobos would be a 0.3-unit speck, so the moons are
             // drawn ~25x larger, and Earth and Saturn are shrunk so they fit in one view.
-            Place("Planet_Mars", new Vector3(-120f, 0f, 60f));
-            var phobos = Place("Moon_Phobos", new Vector3(-80f, 2f, 60f));
+            Place("Planet_Mars", new Vector3(-190f, -20f, 260f));
+            var phobos = Place("Moon_Phobos", new Vector3(-140f, -12f, 250f));
             if (phobos != null) phobos.transform.localScale = Vector3.one * 0.3f;
-            var deimos = Place("Moon_Deimos", new Vector3(-66f, -3f, 60f));
+            var deimos = Place("Moon_Deimos", new Vector3(-122f, -24f, 240f));
             if (deimos != null) deimos.transform.localScale = Vector3.one * 0.3f;
-            SetKmPerUnit(Place("Planet_Earth", new Vector3(140f, 10f, 90f)), 200f);
-            SetKmPerUnit(Place("Planet_Saturn", new Vector3(60f, 40f, 500f)), 2000f);
+            SetKmPerUnit(Place("Planet_Earth", new Vector3(230f, 30f, 330f)), 200f);
+            SetKmPerUnit(Place("Planet_Saturn", new Vector3(80f, 90f, 700f)), 2000f);
 
             var cam = new GameObject("Main Camera") { tag = "MainCamera" }.AddComponent<Camera>();
             cam.transform.SetPositionAndRotation(new Vector3(0f, 6f, -70f), Quaternion.Euler(4f, 0f, 0f));
             cam.farClipPlane = 5000f;
+            var orbit = cam.gameObject.AddComponent<Space.OrbitCamera>();
+            var targets = new System.Collections.Generic.List<Transform>();
+            foreach (var n in new[] { "BlackHole", "Planet_Mars", "Planet_Earth", "Planet_Saturn" })
+            {
+                var go = GameObject.Find(n);
+                if (go != null) targets.Add(go.transform);
+            }
+            orbit.targets = targets.ToArray();
+            orbit.distance = 70f;
+            VisualSetup.AddGlobalVolume();
+            new GameObject("Session").AddComponent<Game.SessionBootstrap>();
 
             EditorSceneManager.SaveScene(scene, $"{SceneDir}/SpaceLab.unity");
             Debug.Log("[Event Horizon] Saved Scenes/SpaceLab.unity.");
@@ -173,6 +197,44 @@ namespace EventHorizon.EditorTools
         {
             var body = go != null ? go.GetComponent<Space.CelestialBody>() : null;
             if (body != null) body.kmPerUnit = km;
+        }
+
+        static void Terminal(TerminalType type, Vector3 pos, float yaw, Transform parent)
+        {
+            var t = Place("Terminal", pos, yaw, parent);
+            if (t != null) t.GetComponent<ColonyTerminal>().type = type;
+        }
+
+        /// <summary>Small soft particles drifting with the wind: airborne dust near the viewer.</summary>
+        static ParticleSystem DustParticles(Transform parent)
+        {
+            var go = new GameObject("Dust Motes");
+            go.transform.SetParent(parent, false);
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.loop = true;
+            main.startLifetime = 6f;
+            main.startSpeed = 0f;
+            main.startSize = new ParticleSystem.MinMaxCurve(0.02f, 0.12f);
+            main.startColor = new Color(0.85f, 0.65f, 0.48f, 0.35f);
+            main.maxParticles = 4000;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(40f, 8f, 40f);
+            var emission = ps.emission;
+            emission.rateOverTime = 40f;
+            var noise = ps.noise;
+            noise.enabled = true;
+            noise.strength = 0.6f;
+            noise.frequency = 0.3f;
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(MatPath("DustMotes"));
+            r.renderMode = ParticleSystemRenderMode.Billboard;
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            ps.Play();
+            return ps;
         }
 
         static TerrainLayer Layer(string name) =>

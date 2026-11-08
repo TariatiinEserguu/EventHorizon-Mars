@@ -79,6 +79,11 @@ namespace EventHorizon.Colony
         public float Amount(ResourceType type) => _amount.TryGetValue(type, out var v) ? v : 0f;
         public float Capacity(ResourceType type) => _capacity.TryGetValue(type, out var v) ? v : 0f;
 
+        /// <summary>Sets a stock directly (save loading, difficulty setup), clamped to tank capacity.</summary>
+        public void SetAmount(ResourceType type, float kg) => _amount[type] = Mathf.Clamp(kg, 0f, Capacity(type));
+
+        public void SetBattery(float wh) => BatteryStoredWh = Mathf.Clamp(wh, 0f, BatteryCapacityWh);
+
         /// <summary>Stores up to <paramref name="kg"/>; returns how much fit. Without tanks, nothing is stored.</summary>
         public float Add(ResourceType type, float kg)
         {

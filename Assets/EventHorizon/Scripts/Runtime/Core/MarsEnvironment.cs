@@ -36,6 +36,8 @@ namespace EventHorizon.Core
         public Light sun;
         [Tooltip("Directional light intensity when the sun is overhead in clear air.")]
         public float sunIntensityAtZenith = 1.3f;
+        [Tooltip("Drive the ambient light from the sun position (dark nights, blue twilight).")]
+        public bool driveAmbient = true;
 
         public int Sol { get; private set; }
         public double SimTimeSeconds { get; private set; }
@@ -54,7 +56,11 @@ namespace EventHorizon.Core
             Physics.gravity = new Vector3(0f, -Gravity, 0f);
             _solClock = startHour / 24.0 * SolSeconds;
             UpdateSun();
+            Shader.SetGlobalVector(SunDirId, SunDirection);
         }
+
+        static readonly int SunDirId = Shader.PropertyToID("_EH_SunDirection");
+        static readonly int TauId = Shader.PropertyToID("_EH_OpticalDepth");
 
         void OnDestroy()
         {
@@ -74,6 +80,8 @@ namespace EventHorizon.Core
             if (advanceSeasons)
                 solarLongitudeDeg = Mathf.Repeat(solarLongitudeDeg + SimDeltaSeconds / SolSeconds * 360f / SolsPerYear, 360f);
             UpdateSun();
+            Shader.SetGlobalVector(SunDirId, SunDirection);
+            Shader.SetGlobalFloat(TauId, opticalDepth);
         }
 
         void UpdateSun()
@@ -96,6 +104,19 @@ namespace EventHorizon.Core
                 float global = direct * Mathf.Max(SunDirection.y, 0f) + diffuse;
                 sun.intensity = sunIntensityAtZenith * global / MeanSolarConstant;
                 sun.enabled = SunDirection.y > -0.05f;
+            }
+
+            if (driveAmbient)
+            {
+                // Sky-lit ambient follows the sun: warm dusty daylight, cool blue twilight, near-black night.
+                float day = Mathf.Clamp01(SunDirection.y * 4f + 0.2f);
+                float twilight = Mathf.Clamp01(1f - Mathf.Abs(SunDirection.y) * 6f);
+                float dust = Mathf.Exp(-0.15f * opticalDepth);
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+                RenderSettings.ambientSkyColor = Color.Lerp(new Color(0.02f, 0.025f, 0.04f), new Color(0.62f, 0.47f, 0.36f), day) * dust
+                                                 + new Color(0.05f, 0.08f, 0.14f) * twilight;
+                RenderSettings.ambientEquatorColor = Color.Lerp(new Color(0.015f, 0.015f, 0.02f), new Color(0.55f, 0.38f, 0.27f), day) * dust;
+                RenderSettings.ambientGroundColor = Color.Lerp(new Color(0.01f, 0.008f, 0.006f), new Color(0.3f, 0.19f, 0.12f), day);
             }
         }
 
@@ -128,6 +149,43 @@ namespace EventHorizon.Core
             float slant = opticalDepth / Mathf.Max(mu, 0.05f);
             directNormal = s * Mathf.Exp(-slant);
             diffuseHorizontal = s * mu * (1f - Mathf.Exp(-slant)) * 0.6f * Mathf.Exp(-0.25f * opticalDepth);
+        }
+
+        /// <summary>Seconds elapsed in the current sol.</summary>
+        public double SolClockSeconds => _solClock;
+
+        /// <summary>Restores the clock from a save.</summary>
+        public void SetClock(int sol, double solClockSeconds, float ls, float tau)
+        {
+            Sol = sol;
+            _solClock = Mathf.Clamp((float)solClockSeconds, 0f, SolSeconds - 1f);
+            solarLongitudeDeg = ls;
+            opticalDepth = tau;
+            UpdateSun();
+        }
+
+        /// <summary>
+        /// Near-surface air temperature (deg C). It follows the Perseverance MEDA range at Jezero: about -85 C before
+        /// dawn to about -10 C mid-afternoon. Dust narrows the daily swing, and perihelion is warmer.
+        /// </summary>
+        public float SurfaceTemperatureC
+        {
+            get
+            {
+                float mean = -48f + 8f * Mathf.Cos((solarLongitudeDeg - PerihelionLs) * Mathf.Deg2Rad);
+                float swing = 38f * Mathf.Exp(-0.25f * opticalDepth);
+                return mean + swing * Mathf.Cos((LocalSolarHour - 14.5f) / 24f * 2f * Mathf.PI);
+            }
+        }
+
+        /// <summary>Formats the local mean solar time as "HH:MM".</summary>
+        public string ClockText
+        {
+            get
+            {
+                int minutes = Mathf.FloorToInt(LocalSolarHour * 60f);
+                return $"{minutes / 60:00}:{minutes % 60:00}";
+            }
         }
 
         /// <summary>Sim delta for systems that may run without a MarsEnvironment in the scene (e.g. test scenes).</summary>

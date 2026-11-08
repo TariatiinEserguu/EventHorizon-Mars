@@ -10,6 +10,13 @@
 // g = Doppler * gravitational redshift, and intensity scales as g^4, so the approaching side is brighter.
 //
 // Put it on a sphere (Unity's default sphere: radius 0.5 = _Bound r_s). Works with the camera inside or outside.
+//
+// Scientifically grounded: photon paths (Schwarzschild null geodesics), the shadow and photon ring, Einstein-ring
+// lensing of the background, ISCO inner edge, Keplerian orbital speeds, Doppler beaming and gravitational redshift
+// (g factor), and the thin-disk temperature profile.
+// Artistic approximations: the gas texture (value noise), the disk thickness (infinitely thin), blackbody-to-RGB
+// colour, the g^3 brightness boost (clamped so it doesn't blow out), and no light-travel-time effects. The black hole
+// does not spin (Schwarzschild, not Kerr).
 Shader "EventHorizon/BlackHoleLensing"
 {
     Properties
@@ -19,7 +26,7 @@ Shader "EventHorizon/BlackHoleLensing"
         _Bound ("Sphere radius in r_s", Float) = 40
         _DiskInner ("Disk inner radius (r_s)", Float) = 3
         _DiskOuter ("Disk outer radius (r_s)", Float) = 14
-        _DiskTemperature ("Disk peak temperature (K)", Float) = 8000
+        _DiskTemperature ("Disk peak temperature (K)", Float) = 4300
         _DiskBrightness ("Disk brightness", Float) = 3
         _DiskOpacity ("Disk opacity", Range(0, 1)) = 0.9
         _DopplerStrength ("Relativistic shift amount", Range(0, 1)) = 1
@@ -86,13 +93,24 @@ Shader "EventHorizon/BlackHoleLensing"
                             lerp(Hash(i + float2(0, 1)), Hash(i + float2(1, 1)), u.x), u.y);
             }
 
+            // Gas density at disk point p after rotating it by angle a. Rotating the point (rather than using
+            // atan2) keeps the noise free of a seam.
+            float DiskNoise(float3 p, float a)
+            {
+                float sa, ca;
+                sincos(a, sa, ca);
+                float2 q = float2(ca * p.x - sa * p.z, sa * p.x + ca * p.z);
+                return ValueNoise(q * 0.55) * 0.55 + ValueNoise(q * 1.6) * 0.3 + ValueNoise(q * 4.2) * 0.15;
+            }
+
             // Approximate blackbody colour in linear RGB for 1000 K - 40000 K (Tanner Helland's fit).
             float3 Blackbody(float t)
             {
                 t = clamp(t, 1000.0, 40000.0) / 100.0;
                 float3 c;
-                c.r = t <= 66.0 ? 1.0 : saturate(1.292936 * pow(t - 60.0, -0.1332048));
-                c.g = t <= 66.0 ? saturate(0.3900816 * log(t) - 0.6318414) : saturate(1.129891 * pow(t - 60.0, -0.0755148));
+                float hot = max(t - 60.0, 1.0);
+                c.r = t <= 66.0 ? 1.0 : saturate(1.292936 * pow(hot, -0.1332048));
+                c.g = t <= 66.0 ? saturate(0.3900816 * log(t) - 0.6318414) : saturate(1.129891 * pow(hot, -0.0755148));
                 c.b = t >= 66.0 ? 1.0 : (t <= 19.0 ? 0.0 : saturate(0.5432068 * log(t - 10.0) - 1.1962541));
                 return c * c; // sRGB-ish to linear
             }
@@ -112,18 +130,20 @@ Shader "EventHorizon/BlackHoleLensing"
                 if (r < _DiskInner || r > _DiskOuter) return float4(0, 0, 0, 0);
 
                 // Differential (Keplerian) rotation: angular velocity sqrt(M / r^3) with M = 0.5 r_s, so the inner
-                // disk laps the outer disk and the gas shears into spirals. Rotating the sample point rather than
-                // using atan2 keeps the noise free of a seam.
+                // disk laps the outer disk. Left running, that shear winds any pattern into ever-tighter rings, so two
+                // samples at staggered phases are cross-faded (a flow-map trick) to keep the visible shear bounded.
+                // [Artistic approximation: the gas texture. The rotation rates are physical.]
                 float omega = sqrt(0.5 / (r * r * r));
-                float sa, ca;
-                sincos(-omega * _Time.y * _RotationSpeed * 10.0, sa, ca);
-                float2 q = float2(ca * p.x - sa * p.z, sa * p.x + ca * p.z);
-                float n = ValueNoise(q * 1.3) * 0.5 + ValueNoise(q * 3.7) * 0.3 + ValueNoise(q * 9.1) * 0.2;
-                float rings = 0.6 + 0.4 * sin(r * 5.0 + n * 3.0);
+                const float cycle = 10.0;
+                float ph1 = frac(_Time.y / cycle), ph2 = frac(_Time.y / cycle + 0.5);
+                float n1 = DiskNoise(p, -omega * ph1 * cycle * _RotationSpeed * 3.0);
+                float n2 = DiskNoise(p, -omega * ph2 * cycle * _RotationSpeed * 3.0 + 1.7);
+                float n = lerp(n1, n2, abs(ph1 * 2.0 - 1.0));
+                float rings = 0.85 + 0.15 * sin(r * 3.0 + n * 6.0);
                 float edges = smoothstep(_DiskInner, _DiskInner * 1.15, r) * (1.0 - smoothstep(_DiskOuter * 0.7, _DiskOuter, r));
                 float density = saturate(n * rings * 1.6 - 0.1) * edges;
 
-                float temperature = _DiskTemperature * 1.9 * pow(_DiskInner / r, 0.75) * pow(saturate(1.0 - sqrt(_DiskInner / r)), 0.25);
+                float temperature = _DiskTemperature * 1.9 * pow(max(_DiskInner / r, 1e-4), 0.75) * pow(max(1.0 - sqrt(_DiskInner / r), 1e-4), 0.25);
 
                 // Orbital speed seen by a static observer: v = sqrt(M / (r - 2M)), M = 0.5.
                 float beta = min(sqrt(0.5 / max(r - 1.0, 1e-3)), 0.99);
@@ -133,7 +153,7 @@ Shader "EventHorizon/BlackHoleLensing"
                 float doppler = 1.0 / (gamma * (1.0 - beta * cosTheta));
                 float g = lerp(1.0, doppler * sqrt(saturate(1.0 - 1.0 / r)), _DopplerStrength);
 
-                float3 emission = Blackbody(temperature * g) * _DiskBrightness * pow(g, 4.0);
+                float3 emission = Blackbody(temperature * g) * _DiskBrightness * min(pow(max(g, 0.0), 3.0), 6.0);
                 return float4(emission, density * _DiskOpacity);
             }
 

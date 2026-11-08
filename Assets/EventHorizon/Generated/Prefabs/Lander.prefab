@@ -72,7 +72,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: EventHorizon.Runtime::EventHorizon.Interaction.ScienceInspectable
   title: Ascent vehicle
   facts: Leaving Mars takes ~4.1 km/s to reach low orbit, about half of what leaving Earth takes. Methane and oxygen propellant can be made on Mars from CO2 and water ice.
-  showSeconds: 8
+  eventId: inspect
 --- !u!1001 &4921856674740482351
 PrefabInstance:
   m_ObjectHideFlags: 0

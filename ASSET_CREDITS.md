@@ -18,6 +18,10 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 | Phobos and Deimos surface textures | NASA/JPL/Solar System Simulator | [science.nasa.gov](https://science.nasa.gov/3d-resources/mars-phobos/), [more](https://science.nasa.gov/3d-resources/mars-deimos/) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Textures on the procedurally generated irregular moon meshes |
 | Mars 2020 Perseverance Rover (3D model) | NASA/Jet Propulsion Laboratory | [science.nasa.gov](https://science.nasa.gov/3d-resources/mars-2020-perseverance-rover/) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Scientifically accurate landmark rover the player can inspect (not the drivable vehicle) |
 | Ingenuity Mars Helicopter (3D model) | NASA/Brian E. Kumanchik | [science.nasa.gov](https://science.nasa.gov/3d-resources/ingenuity-mars-helicopter/) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Landmark and research prop near the Perseverance site |
+| Space Exploration Vehicle (3D model) | NASA | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Exploration%20Vehicle) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Pressurized exploration rover parked at the colony (replaces the toy rover) |
+| Deep Space Network 34-meter antenna (3D model) | NASA/JPL | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Deep%20Space%20Network%2034-meter) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Colony relay antenna (scaled down), replaces the toy satellite dish |
+| Mars Reconnaissance Orbiter (3D model) | NASA/JPL-Caltech | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Orbiter crossing the main-menu sky |
+| Rajdhani and Share Tech Mono fonts | Indian Type Foundry; Carrois Type Design | [github.com](https://github.com/google/fonts/tree/main/ofl/rajdhani), [more](https://github.com/google/fonts/tree/main/ofl/sharetechmono) | [SIL Open Font License 1.1](https://openfontlicense.org) | Yes | All interface text |
 
 ## Verification log
 
@@ -35,6 +39,10 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 | Phobos and Deimos surface textures | Yes | Yes | 2026-11-08: NASA media are generally not copyrighted in the US; NASA should be acknowledged as the source; use must not imply NASA endorsement; the NASA insignia and logotype are not public domain. |
 | Mars 2020 Perseverance Rover (3D model) | Yes | Yes | 2026-11-08: listed in NASA 3D Resources; same NASA media terms as above. |
 | Ingenuity Mars Helicopter (3D model) | Yes | Yes | 2026-11-08: listed in NASA 3D Resources; same NASA media terms as above. |
+| Space Exploration Vehicle (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources; preview shows no NASA insignia. NASA media terms apply. |
+| Deep Space Network 34-meter antenna (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply. |
+| Mars Reconnaissance Orbiter (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply. |
+| Rajdhani and Share Tech Mono fonts | Yes | Yes | 2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts. |
 
 ## Required attribution (shown in the in-game credits)
 
@@ -42,6 +50,10 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 - Phobos and Deimos textures: NASA/JPL/Solar System Simulator.
 - Mars 2020 Perseverance Rover model: NASA/JPL-Caltech.
 - Ingenuity Mars Helicopter model: NASA/Brian E. Kumanchik.
+- Space Exploration Vehicle model: NASA (NASA-3D-Resources).
+- Deep Space Network antenna model: NASA/JPL (NASA-3D-Resources).
+- Mars Reconnaissance Orbiter model: NASA/JPL-Caltech (NASA-3D-Resources).
+- Rajdhani (Indian Type Foundry) and Share Tech Mono (Carrois Type Design), SIL Open Font License 1.1.
 
 In-game text: `Assets/EventHorizon/Resources/ThirdPartyCredits.txt`, read at runtime by `GameCredits.Load()`.
 

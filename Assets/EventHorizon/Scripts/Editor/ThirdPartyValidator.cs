@@ -19,7 +19,7 @@ namespace EventHorizon.EditorTools
         // Triangle budgets per model (RTX 4050 laptop target).
         const int PropBudget = 20000;
         const int CharacterBudget = 30000;
-        const int LandmarkBudget = 250000; // NASA science models, one instance each, culled by LODGroup
+        const int LandmarkBudget = 450000; // NASA science models, one instance each, culled by LODGroup
 
         [MenuItem("Event Horizon/Assets/Validate Third-Party Assets", priority = 20)]
         public static void Validate() => Run(fix: false);
