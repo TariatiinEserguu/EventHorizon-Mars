@@ -39,10 +39,10 @@ namespace EventHorizon.UI
 
             Section("EVENT HORIZON: MARS", null, big: true);
             Line("Created for the 2026 NASA Hackathon");
-            Section("DEVELOPMENT TEAM", "ARES-1 Development Team");
-            Section("PROGRAMMING", "Colony simulation, rendering, UI and tools: ARES-1 Development Team");
-            Section("DESIGN", "Game and interface design: ARES-1 Development Team");
-            Section("STORY AND LORE", "The ARES-1 campaign: ARES-1 Development Team");
+            Section("CREATED BY", "Tariatiin Eserguu");
+            Section("PROGRAMMING", "Tariatiin Eserguu");
+            Section("DESIGN", "Tariatiin Eserguu");
+            Section("STORY AND LORE", "Tariatiin Eserguu");
             Section("SCIENTIFIC REFERENCES", null);
             foreach (var r in References) Line(r);
             Section("MUSIC AND SOUND", "Sound effects: Kenney (kenney.nl), CC0");
