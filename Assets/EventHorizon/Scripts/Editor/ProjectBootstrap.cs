@@ -26,6 +26,24 @@ namespace EventHorizon.EditorTools
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
             if (PlayerSettings.colorSpace != ColorSpace.Linear) PlayerSettings.colorSpace = ColorSpace.Linear;
             if (GraphicsSettings.defaultRenderPipeline == null) CreatePipeline();
+            EnsureInputSystemBackend();
+        }
+
+        /// <summary>
+        /// All controls use the Input System package. With "Input Manager (Old)" as the active backend
+        /// (activeInputHandler 0), they never receive keyboard or mouse input. 1 = Input System only.
+        /// </summary>
+        internal static bool EnsureInputSystemBackend()
+        {
+            var settings = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset");
+            if (settings.Length == 0) return false;
+            var so = new SerializedObject(settings[0]);
+            var prop = so.FindProperty("activeInputHandler");
+            if (prop == null || prop.intValue != 0) return false;
+            prop.intValue = 1;
+            so.ApplyModifiedProperties();
+            Debug.LogWarning("[Event Horizon] Active Input Handling switched to Input System. Restart the editor for Play mode to pick it up.");
+            return true;
         }
 
         [MenuItem("Event Horizon/Setup/Create or Assign URP Pipeline Asset", priority = 100)]

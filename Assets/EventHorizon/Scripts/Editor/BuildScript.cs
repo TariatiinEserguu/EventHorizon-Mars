@@ -31,6 +31,7 @@ namespace EventHorizon.EditorTools
         [MenuItem("Event Horizon/Build/Linux Player", priority = 200)]
         public static void BuildLinux()
         {
+            ProjectBootstrap.EnsureInputSystemBackend();
             Directory.CreateDirectory(Path.GetDirectoryName(LinuxOutput));
             var options = new BuildPlayerOptions
             {
