@@ -1,0 +1,18 @@
+{
+  "id": "polyhaven-mars-ground",
+  "name": "Ground textures: Red Sand, Cracked Red Ground, Red Laterite Soil Stones",
+  "creator": "Poly Haven (Rohit Seervi; Amal Kumar)",
+  "source": "https://polyhaven.com/a/red_sand",
+  "license": "CC0 1.0",
+  "license_url": "https://polyhaven.com/license",
+  "attribution_required": false,
+  "used_for": "Mars terrain layers (tinted toward Martian regolith colour), 1K",
+  "files": {
+    "cracked_red_ground/cracked_red_ground_diff_1k.jpg": "36f41dc2e889c5473c784f3316baf6ac0d4f4e6ad21205781c60e767aa640644",
+    "cracked_red_ground/cracked_red_ground_nor_gl_1k.jpg": "2ca767265e31ee3be95c82ee8892cc1e278ce6655026915678c01aa58894c199",
+    "red_laterite_soil_stones/red_laterite_soil_stones_diff_1k.jpg": "949cd648409b30e2267d89066965605d22dba4ce73d601673e155046c41e1219",
+    "red_laterite_soil_stones/red_laterite_soil_stones_nor_gl_1k.jpg": "05500e4daf8ce2d67ffaf1e5394453979cad016462c5aca917f2323b2b7cd11f",
+    "red_sand/red_sand_diff_1k.jpg": "bac024c281b5a03f95bd22c89207d188fa62a41ed22e8615535f0e1ce5885fbc",
+    "red_sand/red_sand_nor_gl_1k.jpg": "b94d696ead345a8be6286a6597ba6ca1b75c549f466ece4211f2d6306569f9e3"
+  }
+}

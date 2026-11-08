@@ -1,0 +1,13 @@
+{
+  "id": "quaternius-ultimate-space-kit",
+  "name": "Ultimate Space Kit (92 models, animated characters)",
+  "creator": "Quaternius",
+  "source": "https://quaternius.com/packs/ultimatespacekit.html",
+  "license": "CC0 1.0 (as stated on the pack page)",
+  "files": {
+    "Characters/FBX/Astronaut_FernandoTheFlamingo.fbx": "074c572054f7ac7eba59a4eaf82b466fd71124d100f74ae27cc9484904e7c66d",
+    "Characters/FBX/Astronaut_RaeTheRedPanda.fbx": "99c4b851be8c058b205103552f0193ec1ed274587f2b867bbf28786d4565dddf",
+    "Characters/FBX/Astronaut_BarbaraTheBee.fbx": "a60a6eea1f1dc3bc80956570c5194af2b12b8b9153c20a0ec7ee9043e733d8c4",
+    "Characters/FBX/Astronaut_FinnTheFrog.fbx": "9ea6eebe579ad5a2281e7b73d2fb024bccae66f59f2e9e6588fc34ec5c9702e5"
+  }
+}

@@ -1,0 +1,46 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+*.csproj
+*.sln
+*.suo
+*.user
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vs/
+.vscode/
+.idea/
+*.apk
+*.aab
+*.unitypackage
+crashlytics-buildid.txt
+sysinfo.txt
+
+# Third-party asset packs: re-download with `python3 tools/fetch_assets.py`.
+# The files stay out of the public repo (some licenses forbid redistributing raw packs),
+# but their .meta files and SOURCE.json records are committed so GUIDs stay stable.
+/Assets/ThirdParty/**
+!/Assets/ThirdParty/**/
+!/Assets/ThirdParty/**/*.meta
+!/Assets/ThirdParty/**/SOURCE.json
+!/Assets/ThirdParty/README.md
+/.asset_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/

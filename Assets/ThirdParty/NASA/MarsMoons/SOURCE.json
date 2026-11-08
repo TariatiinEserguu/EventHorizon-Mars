@@ -1,0 +1,14 @@
+{
+  "id": "nasa-phobos-deimos",
+  "name": "Phobos and Deimos surface textures",
+  "creator": "NASA/JPL/Solar System Simulator",
+  "source": "https://science.nasa.gov/3d-resources/mars-phobos/",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Textures on the procedurally generated irregular moon meshes",
+  "files": {
+    "Deimos.jpg": "204e89cc7dc128e9fa6ae5f14cc23dc7917a4a8ccab9feff1a9544d22b354dce",
+    "Phobos.jpg": "8ec807b353eb28f44b5aa24b8a887935ee5563f5b63bde2430a9988220f71463"
+  }
+}

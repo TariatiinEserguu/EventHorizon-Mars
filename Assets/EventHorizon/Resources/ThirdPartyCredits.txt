@@ -1,0 +1,20 @@
+THIRD-PARTY ASSETS
+
+Space Kit (150 models): Kenney (CC0 1.0)
+Space Station Kit (90 models): Kenney (CC0 1.0)
+Sci-fi Sounds (70 sounds): Kenney (CC0 1.0)
+Impact Sounds (130 sounds): Kenney (CC0 1.0)
+Ultimate Space Kit (92 models, animated characters): Quaternius (CC0 1.0 (as stated on the pack page))
+Ultimate Crops Pack (100+ crops, 5 growth stages): Quaternius (CC0 1.0 (as stated on the pack page))
+Ground textures: Red Sand, Cracked Red Ground, Red Laterite Soil Stones: Poly Haven (Rohit Seervi; Amal Kumar) (CC0 1.0)
+Rock Boulder Dry (texture): Poly Haven (Dimitrios Savva, Rico Cilliers) (CC0 1.0)
+Planet, Sun, Moon and star-field textures: Solar System Scope (CC BY 4.0)
+  Planet textures by Solar System Scope (https://www.solarsystemscope.com/textures/), licensed under CC BY 4.0. Based on NASA imagery and elevation data.
+Phobos and Deimos surface textures: NASA/JPL/Solar System Simulator (NASA Media Usage Guidelines)
+  Phobos and Deimos textures: NASA/JPL/Solar System Simulator.
+Mars 2020 Perseverance Rover (3D model): NASA/Jet Propulsion Laboratory (NASA Media Usage Guidelines)
+  Mars 2020 Perseverance Rover model: NASA/JPL-Caltech.
+Ingenuity Mars Helicopter (3D model): NASA/Brian E. Kumanchik (NASA Media Usage Guidelines)
+  Ingenuity Mars Helicopter model: NASA/Brian E. Kumanchik.
+
+NASA material is used under NASA's media guidelines. Its use does not imply NASA endorsement.

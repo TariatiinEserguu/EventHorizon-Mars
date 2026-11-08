@@ -1,0 +1,13 @@
+{
+  "id": "nasa-ingenuity",
+  "name": "Ingenuity Mars Helicopter (3D model)",
+  "creator": "NASA/Brian E. Kumanchik",
+  "source": "https://science.nasa.gov/3d-resources/ingenuity-mars-helicopter/",
+  "license": "NASA Media Usage Guidelines",
+  "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "attribution_required": true,
+  "used_for": "Landmark and research prop near the Perseverance site",
+  "files": {
+    "Ingenuity.glb": "9e5a5398ab335eae7d46335085301ce46fb7de052300b645debe8bac6d39f2b5"
+  }
+}
