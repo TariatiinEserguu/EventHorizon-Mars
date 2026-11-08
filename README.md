@@ -28,6 +28,3 @@ cd Space-design-game
 ## Contributing
 
 Contributions are welcome. Open an issue or submit a pull request with improvements.
-
-## Dih
-BIGGG DIIHHH
