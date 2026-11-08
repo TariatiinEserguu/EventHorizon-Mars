@@ -102,6 +102,7 @@ MonoBehaviour:
   title: Sun
   facts: A G2V main-sequence star, 1.39 million km across, surface ~5,772 K. It turns once every ~25 days at the equator and ~35 days near the poles.
   eventId: observe_sun
+  key: Sun
 --- !u!1 &6581110602728351863
 GameObject:
   m_ObjectHideFlags: 0

@@ -35,6 +35,7 @@ namespace EventHorizon.Interaction
             if (Current != null && GameInput.Interact.WasPressedThisFrame())
             {
                 Current.Interact(gameObject);
+                Game.GameEvents.Raise("interacted");
                 Interacted?.Invoke(Current);
             }
         }

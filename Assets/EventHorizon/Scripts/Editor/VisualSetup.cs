@@ -55,6 +55,10 @@ namespace EventHorizon.EditorTools
             ps.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
             ps.match = 1f;
             ps.clearColor = false;
+            // Fira as the global fallback font: Mongolian Cyrillic and scientific symbols render even where a style
+            // uses Rajdhani or Share Tech Mono, which have neither.
+            var text = FontSetup.EnsureTextSettings();
+            if (text != null) ps.textSettings = text;
             EditorUtility.SetDirty(ps);
         }
 
@@ -226,7 +230,21 @@ namespace EventHorizon.EditorTools
             if (hull != null) { hull.SetColor("_BaseColor", new Color(0.82f, 0.82f, 0.8f)); hull.SetFloat("_Metallic", 0.7f); hull.SetFloat("_Smoothness", 0.55f); }
             var lamp = Mat("HabitatLamp", "Universal Render Pipeline/Unlit");
             if (lamp != null) lamp.SetColor("_BaseColor", new Color(1f, 0.85f, 0.6f) * 4f);
-            foreach (var m in new[] { sky, dust, clouds, beacon, screen, hull, lamp }) if (m != null) EditorUtility.SetDirty(m);
+            // Lines for the black-hole lab's guides and orbits: unlit, vertex-coloured, alpha-blended, drawn on top of the lensing.
+            var lines = Mat("LabLines", "Universal Render Pipeline/Particles/Unlit");
+            if (lines != null)
+            {
+                lines.SetColor("_BaseColor", Color.white);
+                lines.SetFloat("_Surface", 1f);
+                lines.SetFloat("_Blend", 0f);
+                lines.SetOverrideTag("RenderType", "Transparent");
+                lines.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+                lines.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+                lines.SetFloat("_ZWrite", 0f);
+                lines.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                lines.renderQueue = (int)RenderQueue.Transparent + 10;
+            }
+            foreach (var m in new[] { sky, dust, clouds, beacon, screen, hull, lamp, lines }) if (m != null) EditorUtility.SetDirty(m);
         }
 
         /// <summary>64x64 soft round sprite for dust particles (otherwise they render as squares).</summary>

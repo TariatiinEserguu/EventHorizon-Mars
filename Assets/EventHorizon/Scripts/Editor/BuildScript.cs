@@ -30,6 +30,7 @@ namespace EventHorizon.EditorTools
             MenuSceneBuilder.Build();
             MenuSceneBuilder.SetBuildScenes();
             ThirdPartyValidator.Validate();
+            LocalizationValidator.Validate();
             BuildLinux();
         }
 

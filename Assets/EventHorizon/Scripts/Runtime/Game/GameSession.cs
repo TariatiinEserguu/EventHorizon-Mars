@@ -33,7 +33,7 @@ namespace EventHorizon.Game
     [Serializable]
     public class SaveData
     {
-        public int version = 1;
+        public int version = 2;
         public string saveName = "New save";
         public string characterName = "Alex Rivera";
         public string callsign = "PATHFINDER";
@@ -42,7 +42,7 @@ namespace EventHorizon.Game
         public TutorialMode tutorial = TutorialMode.Basic;
         public GameMode mode = GameMode.Campaign;
         public SandboxSettings sandbox = new();
-        public int chapter = 1;
+        public int chapter;
         public string missionTitle = "";
         public int population = 4;
         public float colonyDevelopment;
@@ -59,6 +59,8 @@ namespace EventHorizon.Game
         public float opticalDepth = 0.5f;
         public float oxygenKg, waterKg, foodKg, batteryWh, suitOxygenKg;
         public List<string> completedObjectives = new();
+        /// <summary>Quests, decisions, reputation, relationships, research and unlocks.</summary>
+        public Story.StoryState story = new();
         public Dictionary<string, int> Counters => _counters ??= ParseCounters();
         public List<string> counterKeys = new();
         public List<int> counterValues = new();
@@ -107,6 +109,10 @@ namespace EventHorizon.Game
 
         public static double Playtime => State.playtimeSeconds + (Mode == GameMode.None ? 0 : Time.unscaledTime - s_sessionStart);
 
+        /// <summary>How the player arrives in the next scene (for cinematics and placement).</summary>
+        public enum Arrival { None, Lander, Lab }
+        public static Arrival PendingArrival { get; set; }
+
         public static void StartCampaign(SaveData character, int chapter)
         {
             State = character;
@@ -114,8 +120,32 @@ namespace EventHorizon.Game
             State.chapter = chapter;
             State.hasWorldState = false;
             State.completedObjectives.Clear();
+            State.story = Story.Story.StateForChapter(chapter);
             Begin(GameMode.Campaign, restore: false, slot: -1);
-            SceneLoader.Load(Scenes.MarsColony, Campaign.Get(chapter).title);
+            SceneLoader.Load(Scenes.MarsColony, Loc.T(Story.Story.MainQuest(chapter).TitleKey));
+        }
+
+        /// <summary>
+        /// Moves between colony, orbit and the lab during the campaign. The colony's state is captured first and
+        /// restored when the player comes back, so stocks and progress carry over.
+        /// </summary>
+        public static void Travel(string scene, Arrival arrival, string title)
+        {
+            if (Story.StoryTest.Running)
+            {
+                // No scenes in the story test: report the arrival the destination scene would raise.
+                Game.GameEvents.Raise(scene == Scenes.MarsOrbit ? "arrived_orbit" : scene == Scenes.MarsColony ? "arrived_colony"
+                    : Story.StoryContent.Expedition ? "reach_horizon1" : "arrived_lab");
+                return;
+            }
+            if (SceneManager.GetActiveScene().name == Scenes.MarsColony) WorldState.Capture(State);
+            PendingArrival = arrival;
+            RestoreWorld = scene == Scenes.MarsColony && State.hasWorldState;
+            State.scene = scene;
+            Paused = false;
+            Time.timeScale = 1f;
+            GameInput.ClearBlocks();
+            SceneLoader.Load(scene, title);
         }
 
         public static void StartSandbox(SandboxSettings settings, SaveData existing = null)
@@ -123,8 +153,9 @@ namespace EventHorizon.Game
             State = existing ?? new SaveData { saveName = "Free Exploration", characterName = "Explorer", callsign = "NOMAD" };
             State.mode = GameMode.Sandbox;
             State.sandbox = settings;
+            State.story ??= new Story.StoryState();
             Begin(GameMode.Sandbox, restore: existing != null && existing.hasWorldState, slot: SaveSystem.SandboxSlot);
-            SceneLoader.Load(Scenes.MarsColony, "Free Exploration");
+            SceneLoader.Load(Scenes.MarsColony, Loc.T("MODE_SANDBOX"));
         }
 
         public static void StartScience(string scene)
@@ -133,12 +164,14 @@ namespace EventHorizon.Game
             State.mode = GameMode.Science;
             State.sandbox = new SandboxSettings { infiniteSuitOxygen = true, dustStorms = false };
             Begin(GameMode.Science, restore: false, slot: -1);
-            SceneLoader.Load(scene, "Science Laboratory");
+            SceneLoader.Load(scene, Loc.T("MENU_SCIENCE_LAB"));
         }
 
         public static void LoadSave(SaveData data, int slot)
         {
             State = data;
+            State.story ??= new Story.StoryState();
+            PendingArrival = Arrival.None;
             Begin(data.mode, restore: data.hasWorldState, slot: slot);
             SceneLoader.Load(string.IsNullOrEmpty(data.scene) ? Scenes.MarsColony : data.scene, data.saveName);
         }
@@ -151,7 +184,8 @@ namespace EventHorizon.Game
             GameInput.PointerScene = false;
             Time.timeScale = 1f;
             GameInput.ClearBlocks();
-            SceneLoader.Load(Scenes.MainMenu, "Main menu");
+            PendingArrival = Arrival.None;
+            SceneLoader.Load(Scenes.MainMenu, Loc.T("LOADING_MAIN_MENU"));
         }
 
         static void Begin(GameMode mode, bool restore, int slot)
@@ -164,6 +198,16 @@ namespace EventHorizon.Game
             Time.timeScale = 1f;
             s_sessionStart = Time.unscaledTime;
             GameInput.ClearBlocks();
+        }
+
+        /// <summary>Story test only: a campaign session without loading any scene.</summary>
+        public static void BeginTest(SaveData state)
+        {
+            State = state;
+            State.story ??= new Story.StoryState();
+            Mode = GameMode.Campaign;
+            RestoreWorld = false;
+            ActiveSlot = -1;
         }
 
         /// <summary>Resets the playtime clock after a save so it isn't counted twice.</summary>

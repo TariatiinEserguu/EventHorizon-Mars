@@ -86,8 +86,8 @@ namespace EventHorizon.Space
             {
                 _shownIndex = targetIndex;
                 var info = CurrentTarget.GetComponentInParent<ScienceInspectable>();
-                if (info != null) UI.Hud.ShowInfo(info.title, info.facts, 10f);
-                else UI.Hud.Toast($"TARGET  //  {CurrentTarget.name.Replace("Planet_", "").Replace("Moon_", "").ToUpperInvariant()}");
+                if (info != null) UI.Hud.ShowInfo(info.Title, info.Facts, 10f);
+                else UI.Hud.Toast(Loc.T("TOAST_TARGET", Loc.TOr("TARGET_" + CurrentTarget.name, CurrentTarget.name.Replace("Planet_", "").Replace("Moon_", "").ToUpperInvariant())));
             }
         }
 

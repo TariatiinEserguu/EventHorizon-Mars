@@ -365,20 +365,22 @@
     },
     {
       "id": "fonts-ofl",
-      "name": "Rajdhani and Share Tech Mono fonts",
-      "creator": "Indian Type Foundry; Carrois Type Design",
+      "name": "Rajdhani, Share Tech Mono, Fira Sans Condensed and Fira Mono fonts",
+      "creator": "Indian Type Foundry; Carrois Type Design; The Mozilla Foundation and Telefonica S.A.",
       "source": "https://github.com/google/fonts/tree/main/ofl/rajdhani",
       "extra_sources": [
-        "https://github.com/google/fonts/tree/main/ofl/sharetechmono"
+        "https://github.com/google/fonts/tree/main/ofl/sharetechmono",
+        "https://github.com/google/fonts/tree/main/ofl/firasanscondensed",
+        "https://github.com/google/fonts/tree/main/ofl/firamono"
       ],
       "license": "SIL Open Font License 1.1",
       "license_url": "https://openfontlicense.org",
       "attribution_required": true,
-      "attribution_text": "Rajdhani (Indian Type Foundry) and Share Tech Mono (Carrois Type Design), SIL Open Font License 1.1.",
+      "attribution_text": "Rajdhani (Indian Type Foundry), Share Tech Mono (Carrois Type Design), Fira Sans Condensed and Fira Mono (The Mozilla Foundation and Telefonica S.A.), SIL Open Font License 1.1.",
       "commercial_use": true,
       "modification": true,
-      "verified": "2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts.",
-      "used_for": "All interface text",
+      "verified": "2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts. Fira covers Cyrillic including the Mongolian letters Ө and Ү.",
+      "used_for": "All interface text; Fira provides Mongolian Cyrillic and scientific symbols",
       "fetch": {
         "method": "bundled"
       },

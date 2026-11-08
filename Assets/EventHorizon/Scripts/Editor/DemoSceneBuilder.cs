@@ -124,6 +124,9 @@ namespace EventHorizon.EditorTools
             Terminal(TerminalType.Solar, new Vector3(36f, 0f, -16f), 225f, ct);
             Terminal(TerminalType.Greenhouse, new Vector3(-18f, 0f, 0.5f), 90f, ct);
 
+            // The story's places, colonists, extra terminals and the cinematic director.
+            StoryKit.Build(terrain, ct);
+
             // Weather: dust motes around the camera, fog and occasional storms.
             var weather = new GameObject("Weather").AddComponent<DustStormSystem>();
             weather.dust = DustParticles(weather.transform);

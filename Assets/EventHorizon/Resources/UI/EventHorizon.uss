@@ -275,3 +275,68 @@
     background-color: rgba(4, 10, 22, 0.65); padding: 1px 6px; margin-top: 6px; border-radius: 2px;
 }
 .eh-marker--edge .eh-marker-diamond { background-color: rgba(255, 138, 61, 0.7); }
+
+/* ---------------------------------------------------------------- languages
+   Rajdhani and Share Tech Mono have no Cyrillic, so Mongolian swaps in Fira Sans Condensed (UI) and Fira Mono
+   (data), which cover every Mongolian letter (including Ө and Ү) and the scientific symbols. Cyrillic words run
+   longer than English ones, so wide letter-spacing is reduced. Fira is also the global fallback font for any
+   language (PanelTextSettings), so a Cyrillic name typed in the English interface still renders. */
+.eh-root.lang-mn { -unity-font: url("../../Fonts/FiraSansCondensed-Medium.ttf"); font-size: 21px; }
+.lang-mn .eh-bold, .lang-mn .eh-panel-title, .lang-mn .eh-logo-title, .lang-mn .eh-btn, .lang-mn .eh-btn-small,
+.lang-mn .eh-tab, .lang-mn .eh-card-title { -unity-font: url("../../Fonts/FiraSansCondensed-SemiBold.ttf"); }
+.lang-mn .eh-logo-mars, .lang-mn .eh-setting-label, .lang-mn .eh-body { -unity-font: url("../../Fonts/FiraSansCondensed-Medium.ttf"); }
+.lang-mn .eh-mono, .lang-mn .eh-kicker, .lang-mn .eh-logo-sub, .lang-mn .eh-choice-value, .lang-mn .eh-badge,
+.lang-mn .eh-hud-label, .lang-mn .eh-hud-value, .lang-mn .unity-text-field__input,
+.lang-mn .unity-base-text-field__input { -unity-font: url("../../Fonts/FiraMono-Regular.ttf"); }
+.lang-mn .eh-panel-title { letter-spacing: 2px; }
+.lang-mn .eh-kicker, .lang-mn .eh-logo-sub, .lang-mn .eh-hud-label, .lang-mn .eh-badge { letter-spacing: 1px; }
+.lang-mn .eh-btn { letter-spacing: 1px; font-size: 22px; }
+.lang-mn .eh-btn-small, .lang-mn .eh-tab, .lang-mn .eh-card-title { letter-spacing: 1px; }
+.lang-mn .eh-hud-label { font-size: 14px; }
+.lang-mn .eh-choice-value { font-size: 17px; }
+
+/* Language picker (first start, main menu, settings, pause menu) */
+.eh-lang-row { flex-direction: row; flex-wrap: wrap; margin-top: 6px; }
+.eh-lang-card { width: 260px; padding: 18px; margin: 0 12px 12px 0; border-width: 1px; border-color: rgba(79, 209, 255, 0.35);
+    background-color: rgba(8, 20, 38, 0.85); border-radius: 2px; }
+.eh-lang-card:hover { border-color: rgb(79, 209, 255); background-color: rgba(14, 34, 60, 0.95); }
+.eh-lang-card--selected { border-color: rgb(79, 209, 255); background-color: rgba(79, 209, 255, 0.18); }
+.eh-lang-native { -unity-font: url("../../Fonts/FiraSansCondensed-SemiBold.ttf"); font-size: 30px; color: rgb(236, 244, 248); }
+.eh-lang-english { -unity-font: url("../../Fonts/FiraMono-Regular.ttf"); font-size: 14px; color: rgba(200, 226, 238, 0.6); margin-top: 4px; }
+.eh-lang-chip { flex-direction: row; position: absolute; right: 40px; top: 30px; }
+
+/* ---------------------------------------------------------------- dialogue and subtitles */
+/* Between the suit panel (bottom left) and the info card (bottom right), so subtitles never cover either. */
+.eh-subtitles { position: absolute; left: 400px; right: 590px; bottom: 28px; align-items: center; }
+.eh-subtitle-box { max-width: 100%; padding: 12px 22px; background-color: rgba(2, 8, 18, 0.82); border-radius: 2px;
+    border-left-width: 3px; border-color: rgb(79, 209, 255); }
+.eh-subtitle-speaker { -unity-font: url("../../Fonts/FiraMono-Regular.ttf"); font-size: 16px; letter-spacing: 2px; color: rgb(79, 209, 255); }
+.eh-subtitle-text { white-space: normal; font-size: 24px; color: rgb(236, 244, 248); margin-top: 2px; }
+.lang-mn .eh-subtitle-text { -unity-font: url("../../Fonts/FiraSansCondensed-Medium.ttf"); }
+.eh-subtitle-hint { -unity-font: url("../../Fonts/FiraMono-Regular.ttf"); font-size: 13px; color: rgba(200, 226, 238, 0.5); margin-top: 6px; -unity-text-align: middle-right; }
+.eh-portrait { width: 64px; height: 64px; border-radius: 32px; margin-right: 14px; align-items: center; justify-content: center;
+    border-width: 2px; border-color: rgba(255, 255, 255, 0.5); }
+.eh-portrait-initials { -unity-font: url("../../Fonts/FiraSansCondensed-SemiBold.ttf"); font-size: 24px; color: rgb(255, 255, 255); }
+.eh-choice-btn { margin-top: 6px; padding: 8px 14px; background-color: rgba(8, 20, 38, 0.9); border-width: 1px;
+    border-color: rgba(79, 209, 255, 0.45); color: rgb(230, 245, 250); -unity-text-align: middle-left; white-space: normal; font-size: 21px; }
+.eh-choice-btn:hover { border-color: rgb(79, 209, 255); background-color: rgba(79, 209, 255, 0.18); }
+.eh-letterbox { position: absolute; left: 0; right: 0; height: 9%; background-color: rgb(0, 0, 0); }
+.eh-fade { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgb(0, 0, 0); opacity: 0;
+    transition-property: opacity; transition-duration: 0.6s; }
+.eh-cockpit-frame { position: absolute; left: 0; right: 0; top: 0; bottom: 0; border-width: 70px 120px 180px 120px;
+    border-color: rgb(14, 16, 20); border-radius: 220px; }
+.eh-nametag { position: absolute; align-items: center; }
+.eh-nametag-name { -unity-font: url("../../Fonts/FiraSansCondensed-SemiBold.ttf"); font-size: 17px; color: rgb(236, 244, 248);
+    background-color: rgba(2, 8, 18, 0.7); padding: 2px 8px; }
+.eh-nametag-role { -unity-font: url("../../Fonts/FiraMono-Regular.ttf"); font-size: 12px; color: rgba(79, 209, 255, 0.9); }
+.eh-hold { width: 220px; height: 6px; background-color: rgba(255, 255, 255, 0.15); margin-top: 6px; }
+.eh-hold-fill { height: 100%; width: 0; background-color: rgb(79, 209, 255); }
+.eh-reward { -unity-font: url("../../Fonts/FiraMono-Regular.ttf"); font-size: 16px; color: rgb(255, 196, 92); }
+.eh-optional { color: rgba(200, 226, 238, 0.7); }
+.eh-cat-badge { -unity-font: url("../../Fonts/FiraMono-Regular.ttf"); font-size: 12px; letter-spacing: 1px; padding: 2px 6px;
+    border-width: 1px; border-color: rgba(79, 209, 255, 0.5); color: rgb(79, 209, 255); margin-right: 8px; }
+.eh-cat-badge--main { border-color: rgb(255, 138, 61); color: rgb(255, 138, 61); }
+
+/* Long toasts (and longer Mongolian ones) wrap instead of running off the screen. */
+.eh-toast { white-space: normal; max-width: 460px; }
+.lang-mn .eh-tab { padding-left: 8px; padding-right: 8px; }

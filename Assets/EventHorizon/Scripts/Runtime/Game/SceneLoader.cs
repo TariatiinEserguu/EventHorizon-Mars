@@ -15,38 +15,9 @@ namespace EventHorizon.Game
     {
         static SceneLoader s_active;
 
-        static readonly string[] Messages =
-        {
-            "Checking atmospheric pressure...",
-            "Initializing ARES-1 life-support network...",
-            "Calibrating solar power distribution...",
-            "Synchronizing Martian navigation systems...",
-            "Pressurizing habitat modules...",
-            "Downloading orbital weather data from relay satellite...",
-            "Verifying suit seals and oxygen reserves...",
-        };
-
-        static readonly string[] Facts =
-        {
-            "A sol, one Martian day, lasts 24 hours 39 minutes 35 seconds.",
-            "Mars' air pressure is about 0.6% of Earth's at sea level, too thin for liquid water to last on the surface.",
-            "Olympus Mons rises about 22 km above the surrounding plains, nearly three times Everest's height above sea level.",
-            "Valles Marineris is about 4,000 km long and up to 7 km deep.",
-            "Martian sunsets are blue: fine dust scatters blue light forward, toward the setting Sun.",
-            "Phobos orbits Mars three times a day and is slowly spiralling inward.",
-            "Radio signals take between 3 and 22 minutes to travel between Earth and Mars.",
-            "MOXIE, aboard Perseverance, made 122 g of oxygen from Martian CO2 between 2021 and 2023.",
-        };
-
-        static readonly string[] Tips =
-        {
-            "Clean the solar panels regularly: dust cuts their output a little every sol.",
-            "Watch the oxygen gauge. Refill your suit at any oxygen tank.",
-            "Terminals show live data for each facility. Use one to check what is wrong.",
-            "In a dust storm, solar output can drop by more than half. Charge the batteries beforehand.",
-            "Press V to switch between first-person and third-person view.",
-            "The Science Laboratory explains the physics behind every colony system.",
-        };
+        // Loading-screen text lives in the UI table: LOAD_MSG_1.., FACT_1.., TIP_1..
+        const int MessageCount = 7, FactCount = 12, TipCount = 10;
+        static string Msg(int i) => Loc.T("LOAD_MSG_" + (i % MessageCount + 1));
 
         public static void Load(string scene, string title)
         {
@@ -88,14 +59,16 @@ namespace EventHorizon.Game
 
             var info = UiKit.Box(screen, "eh-col", "eh-grow");
             info.style.marginLeft = 80;
-            UiKit.Text(info, "ARES-1 COLONY NETWORK // YEAR 2189", "eh-kicker");
-            UiKit.Text(info, title.ToUpperInvariant(), "eh-logo-title").style.fontSize = 60;
+            UiKit.Text(info, Loc.T("MENU_KICKER"), "eh-kicker");
+            var heading = UiKit.Text(info, Loc.Upper(title), "eh-logo-title");
+            heading.style.fontSize = 60;
+            heading.style.whiteSpace = WhiteSpace.Normal;
             UiKit.Divider(info);
-            UiKit.Text(info, "DID YOU KNOW", "eh-kicker");
-            UiKit.Text(info, Facts[Random.Range(0, Facts.Length)], "eh-body");
-            UiKit.Text(info, "TIP", "eh-kicker").style.marginTop = 14;
-            UiKit.Text(info, Tips[Random.Range(0, Tips.Length)], "eh-body");
-            var status = UiKit.Text(info, Messages[0], "eh-mono", "eh-accent");
+            UiKit.Text(info, Loc.T("LOAD_DID_YOU_KNOW"), "eh-kicker");
+            UiKit.Text(info, Loc.T("FACT_" + Random.Range(1, FactCount + 1)), "eh-body");
+            UiKit.Text(info, Loc.T("LOAD_TIP"), "eh-kicker").style.marginTop = 14;
+            UiKit.Text(info, Loc.T("TIP_" + Random.Range(1, TipCount + 1)), "eh-body");
+            var status = UiKit.Text(info, Msg(0), "eh-mono", "eh-accent");
             status.style.marginTop = 30;
             var bar = UiKit.Bar(info, out var fill);
             bar.style.marginTop = 8;
@@ -121,7 +94,7 @@ namespace EventHorizon.Game
                 float target = Mathf.Min(op.progress / 0.9f, t / 1.4f);
                 shown = Mathf.MoveTowards(shown, target, Time.unscaledDeltaTime * 2.5f);
                 UiKit.SetFill(fill, shown);
-                if (Time.unscaledTime > nextMsg) { msg = (msg + 1) % Messages.Length; status.text = Messages[msg]; nextMsg = Time.unscaledTime + 0.35f; }
+                if (Time.unscaledTime > nextMsg) { msg++; status.text = Msg(msg); nextMsg = Time.unscaledTime + 0.35f; }
                 float a = t * 40f * Mathf.Deg2Rad;
                 moon.style.left = 220 + Mathf.Cos(a) * 220 - 7;
                 moon.style.top = 220 + Mathf.Sin(a) * 220 - 7;

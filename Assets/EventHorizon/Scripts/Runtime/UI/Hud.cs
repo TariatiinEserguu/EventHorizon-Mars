@@ -4,15 +4,17 @@ using EventHorizon.Colony;
 using EventHorizon.Core;
 using EventHorizon.Game;
 using EventHorizon.Interaction;
+using EventHorizon.Story;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace EventHorizon.UI
 {
     /// <summary>
-    /// Astronaut HUD: suit oxygen, integrity, energy, outside temperature, mission and objectives, Martian time,
-    /// compass, coordinates, colony summary, interaction prompt and toasts. Kept to the screen edges so it
-    /// doesn't cover the view.
+    /// Astronaut HUD: suit oxygen, integrity, energy, outside temperature, the task panel (current mission,
+    /// chapter progress, objectives), a waypoint to the current objective, Martian time, compass, coordinates,
+    /// colony summary, interaction prompt with work progress, colonists' name tags and toasts. Every label is
+    /// localized and the whole HUD rebuilds when the language changes.
     /// </summary>
     public class Hud : MonoBehaviour
     {
@@ -21,15 +23,21 @@ namespace EventHorizon.UI
         const double MetresPerDegree = 2 * System.Math.PI * 3389500.0 / 360.0;
 
         static Hud s_instance;
+        /// <summary>Hides the HUD during cinematics and endings.</summary>
+        public static bool Hidden { get; set; }
+        /// <summary>Shows info cards bottom-left instead of bottom-right (the black-hole lab's panel is on the right).</summary>
+        public static bool InfoOnLeft { get; set; }
+
         UIDocument _doc;
-        VisualElement _root, _hud, _toasts, _info, _prompt, _compassStrip, _objectives, _top, _suitBlock;
-        Label _promptLabel, _infoTitle, _infoBody, _o2Val, _intVal, _energyVal, _tempVal, _clock, _coords, _mission, _colony;
-        VisualElement _o2Fill, _intFill, _energyFill, _chapterFill, _marker;
+        VisualElement _root, _hud, _toasts, _info, _prompt, _compassStrip, _objectives, _top, _suitBlock, _missionBlock, _tags;
+        Label _promptLabel, _infoTitle, _infoBody, _o2Val, _intVal, _energyVal, _tempVal, _clock, _coords, _mission, _colony, _hint;
+        VisualElement _o2Fill, _intFill, _energyFill, _chapterFill, _marker, _holdBar, _holdFill;
         Label _chapterLabel, _markerLabel;
         string _objectiveSignature;
         float _nextObjectiveRefresh;
         Vector3? _waypoint;
         readonly List<(Label label, float angle)> _compassMarks = new();
+        readonly Dictionary<Npc, VisualElement> _nametags = new();
         float _infoHideAt;
         AstronautController _player;
         SuitLifeSupport _suit;
@@ -44,11 +52,13 @@ namespace EventHorizon.UI
             s_instance = doc.gameObject.AddComponent<Hud>();
             s_instance._doc = doc;
             s_instance.Build();
+            Loc.Changed += s_instance.Rebuild;
             return s_instance;
         }
 
         public static void Toast(string text, bool warning = false)
         {
+            if (StoryTest.Running || string.IsNullOrEmpty(text)) return;
             var h = Ensure();
             var t = UiKit.Text(h._toasts, text, "eh-toast", "eh-toast--hidden");
             if (warning) t.AddToClassList("eh-toast--warn");
@@ -59,11 +69,31 @@ namespace EventHorizon.UI
 
         public static void ShowInfo(string title, string body, float seconds = 9f)
         {
+            if (StoryTest.Running) return;
             var h = Ensure();
-            h._infoTitle.text = title.ToUpperInvariant();
+            h._info.style.right = InfoOnLeft ? StyleKeyword.Auto : 24;
+            h._info.style.left = InfoOnLeft ? 24 : StyleKeyword.Auto;
+            h._infoTitle.text = Loc.Upper(title);
             h._infoBody.text = body;
             h._info.style.display = DisplayStyle.Flex;
             h._infoHideAt = Time.unscaledTime + seconds;
+        }
+
+        void Rebuild()
+        {
+            var toasts = _toasts;
+            toasts?.RemoveFromHierarchy();
+            _root.Clear();
+            _compassMarks.Clear();
+            _nametags.Clear();
+            _objectiveSignature = null;
+            Build();
+        }
+
+        void OnDestroy()
+        {
+            Loc.Changed -= Rebuild;
+            if (s_instance == this) s_instance = null;
         }
 
         void Build()
@@ -71,6 +101,8 @@ namespace EventHorizon.UI
             _root = _doc.rootVisualElement;
             _hud = UiKit.Box(_root, "eh-fill");
             _hud.pickingMode = PickingMode.Ignore;
+            _tags = UiKit.Box(_hud, "eh-fill");
+            _tags.pickingMode = PickingMode.Ignore;
 
             // Top centre: compass
             var top = _top = UiKit.Box(_hud, "eh-col");
@@ -80,10 +112,10 @@ namespace EventHorizon.UI
             top.style.right = 0;
             top.style.alignItems = Align.Center;
             _compassStrip = UiKit.Box(top, "eh-compass");
-            foreach (var (name, angle) in new[] { ("N", 0f), ("NE", 45f), ("E", 90f), ("SE", 135f), ("S", 180f), ("SW", 225f), ("W", 270f), ("NW", 315f) })
+            foreach (var (key, angle) in new[] { ("N", 0f), ("NE", 45f), ("E", 90f), ("SE", 135f), ("S", 180f), ("SW", 225f), ("W", 270f), ("NW", 315f) })
             {
-                var l = UiKit.Text(_compassStrip, name, "eh-compass-mark");
-                if (name.Length == 1) l.AddToClassList("eh-compass-mark--cardinal");
+                var l = UiKit.Text(_compassStrip, Loc.T("COMPASS_" + key), "eh-compass-mark");
+                if (key.Length == 1) l.AddToClassList("eh-compass-mark--cardinal");
                 _compassMarks.Add((l, angle));
             }
             for (int a = 15; a < 360; a += 15)
@@ -91,22 +123,24 @@ namespace EventHorizon.UI
             _coords = UiKit.Text(top, "", "eh-hud-label");
             _coords.style.marginTop = 4;
 
-            // Top left: mission + objectives
             // Task panel: mission title, chapter progress, then each objective with its own progress.
-            var mission = UiKit.Box(_hud, "eh-hud-block", "eh-task-panel");
+            var mission = _missionBlock = UiKit.Box(_hud, "eh-hud-block", "eh-task-panel");
             mission.style.position = Position.Absolute;
             mission.style.left = 24;
             mission.style.top = 20;
-            mission.style.width = 440;
+            mission.style.width = 460;
             var head = UiKit.Box(mission, "eh-row");
-            UiKit.Text(head, "CURRENT MISSION", "eh-hud-label");
+            UiKit.Text(head, Loc.T("HUD_CURRENT_MISSION"), "eh-hud-label");
             UiKit.Box(head, "eh-spacer");
             _chapterLabel = UiKit.Text(head, "", "eh-hud-label");
             _mission = UiKit.Text(mission, "", "eh-card-title");
+            _mission.style.whiteSpace = WhiteSpace.Normal;
             var chapterBar = UiKit.Bar(mission, out _chapterFill);
             chapterBar.style.marginTop = 4;
             chapterBar.style.marginBottom = 6;
             _objectives = UiKit.Box(mission, "eh-col");
+            _hint = UiKit.Text(mission, Loc.T("HUD_JOURNAL_HINT", GameInput.DisplayBinding(GameInput.Missions)), "eh-hud-label");
+            _hint.style.marginTop = 6;
 
             // Waypoint marker for the current objective.
             _marker = UiKit.Box(_hud, "eh-marker");
@@ -129,25 +163,27 @@ namespace EventHorizon.UI
             suit.style.position = Position.Absolute;
             suit.style.left = 24;
             suit.style.bottom = 24;
-            suit.style.width = 340;
-            UiKit.Text(suit, "SUIT STATUS", "eh-hud-label");
-            _o2Val = Gauge(suit, "OXYGEN", out _o2Fill);
-            _intVal = Gauge(suit, "INTEGRITY", out _intFill);
-            _energyVal = Gauge(suit, "ENERGY", out _energyFill);
+            suit.style.width = 360;
+            UiKit.Text(suit, Loc.T("HUD_SUIT_STATUS"), "eh-hud-label");
+            _o2Val = Gauge(suit, Loc.T("HUD_OXYGEN"), out _o2Fill);
+            _intVal = Gauge(suit, Loc.T("HUD_INTEGRITY"), out _intFill);
+            _energyVal = Gauge(suit, Loc.T("HUD_ENERGY"), out _energyFill);
             var temp = UiKit.Box(suit, "eh-row");
-            UiKit.Text(temp, "EXT TEMP", "eh-hud-label").style.width = 110;
+            UiKit.Text(temp, Loc.T("HUD_EXT_TEMP"), "eh-hud-label").style.width = 120;
             _tempVal = UiKit.Text(temp, "", "eh-hud-value");
 
             UiKit.Box(_hud, "eh-crosshair");
             _prompt = UiKit.Box(_hud, "eh-prompt");
             _promptLabel = UiKit.Text(_prompt, "", "eh-prompt-label");
+            _holdBar = UiKit.Box(_prompt, "eh-hold");
+            _holdFill = UiKit.Box(_holdBar, "eh-hold-fill");
             _prompt.style.display = DisplayStyle.None;
 
             _info = UiKit.Box(_hud, "eh-panel");
             _info.style.position = Position.Absolute;
             _info.style.right = 24;
             _info.style.bottom = 24;
-            _info.style.width = 520;
+            _info.style.width = 540;
             _infoTitle = UiKit.Text(_info, "", "eh-panel-title");
             _infoBody = UiKit.Text(_info, "", "eh-body");
             _info.style.display = DisplayStyle.None;
@@ -160,7 +196,7 @@ namespace EventHorizon.UI
         {
             var row = UiKit.Box(parent, "eh-row");
             row.style.marginTop = 4;
-            UiKit.Text(row, label, "eh-hud-label").style.width = 110;
+            UiKit.Text(row, label, "eh-hud-label").style.width = 120;
             var bar = UiKit.Bar(row, out fill);
             bar.style.flexGrow = 1;
             var v = UiKit.Text(row, "", "eh-hud-value");
@@ -171,7 +207,7 @@ namespace EventHorizon.UI
 
         void Update()
         {
-            bool show = SettingsService.Current.gameplay.showHud && !GameSession.Paused;
+            bool show = SettingsService.Current.gameplay.showHud && !GameSession.Paused && !Hidden;
             _hud.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
             if (_info.style.display == DisplayStyle.Flex && Time.unscaledTime > _infoHideAt) _info.style.display = DisplayStyle.None;
             if (!show) return;
@@ -188,7 +224,7 @@ namespace EventHorizon.UI
             {
                 float o2 = _suit.OxygenFraction;
                 UiKit.SetFill(_o2Fill, o2, o2 < 0.25f);
-                _o2Val.text = _suit.infiniteOxygen ? "INF" : $"{_suit.HoursLeft:0.0} h";
+                _o2Val.text = _suit.infiniteOxygen ? Loc.T("HUD_INFINITE") : Loc.T("HUD_HOURS", _suit.HoursLeft.ToString("0.0"));
                 _o2Val.EnableInClassList("eh-warn", o2 < 0.25f && !_suit.infiniteOxygen);
                 UiKit.SetFill(_intFill, _suit.integrity, _suit.integrity < 0.5f);
                 _intVal.text = $"{_suit.integrity * 100f:0}%";
@@ -199,18 +235,20 @@ namespace EventHorizon.UI
             var env = MarsEnvironment.Instance;
             if (env != null)
             {
-                _clock.text = $"SOL {env.Sol:000}  {env.ClockText} LMST";
+                _clock.text = Loc.T("HUD_CLOCK", env.Sol.ToString("000"), env.ClockText);
                 float t = env.SurfaceTemperatureC;
-                _tempVal.text = $"{t:0} C  /  {t + 273.15f:0} K";
-                string storm = env.opticalDepth > 2f ? "  DUST STORM" : "";
-                _colony.text = $"TAU {env.opticalDepth:0.0}{storm}";
+                _tempVal.text = $"{t:0} °C  /  {t + 273.15f:0} K";
+                _colony.text = Loc.T("HUD_TAU", env.opticalDepth.ToString("0.0")) + (env.opticalDepth > 2f ? "  " + Loc.T("HUD_DUST_STORM") : "");
                 _colony.EnableInClassList("eh-warn", env.opticalDepth > 2f);
             }
             var grid = ColonyGrid.Instance;
             if (grid != null)
-                _colony.text += $"\nPWR {grid.ProductionWatts / 1000f:0.0}/{grid.DemandWatts / 1000f:0.0} kW  BAT {grid.BatteryFraction * 100f:0}%\nO2 {grid.Amount(ResourceType.Oxygen):0} kg  H2O {grid.Amount(ResourceType.Water):0} kg  FOOD {grid.Amount(ResourceType.Food):0} kg";
+                _colony.text += "\n" + Loc.T("HUD_COLONY", (grid.ProductionWatts / 1000f).ToString("0.0"), (grid.DemandWatts / 1000f).ToString("0.0"),
+                    (grid.BatteryFraction * 100f).ToString("0"), grid.Amount(ResourceType.Oxygen).ToString("0"),
+                    grid.Amount(ResourceType.Water).ToString("0"), grid.Amount(ResourceType.Food).ToString("0"));
 
             UpdateTasks();
+            UpdateNametags();
 
             // Compass + coordinates
             var cam = Camera.main;
@@ -227,58 +265,74 @@ namespace EventHorizon.UI
                 var p = _player != null ? _player.transform.position : cam.transform.position;
                 double lat = SiteLatitude + p.z / MetresPerDegree;
                 double lon = SiteLongitude + p.x / (MetresPerDegree * System.Math.Cos(lat * System.Math.PI / 180.0));
-                _coords.text = $"{System.Math.Abs(lat):0.00000} {(lat >= 0 ? "N" : "S")}   {lon:0.00000} E   HDG {heading:000}   ALT {p.y:+0;-0} m";
+                _coords.text = Loc.T("HUD_COORDS", System.Math.Abs(lat).ToString("0.00000"), Loc.T(lat >= 0 ? "COMPASS_N" : "COMPASS_S"),
+                    lon.ToString("0.00000"), Loc.T("COMPASS_E"), heading.ToString("000"), p.y.ToString("+0;-0"));
             }
 
-            // Prompt
-            string prompt = _interactor != null ? _interactor.CurrentPrompt : null;
-            _prompt.style.display = string.IsNullOrEmpty(prompt) ? DisplayStyle.None : DisplayStyle.Flex;
-            if (!string.IsNullOrEmpty(prompt)) _promptLabel.text = $"[{GameInput.DisplayBinding(GameInput.Interact)}]  {prompt}";
+            // Prompt, or the progress of work in hand.
+            if (StoryWork.Busy)
+            {
+                _prompt.style.display = DisplayStyle.Flex;
+                _promptLabel.text = $"{StoryWork.Label}  {StoryWork.Progress01 * 100f:0}%";
+                _holdBar.style.display = DisplayStyle.Flex;
+                _holdFill.style.width = Length.Percent(StoryWork.Progress01 * 100f);
+            }
+            else
+            {
+                string prompt = _interactor != null ? _interactor.CurrentPrompt : null;
+                _prompt.style.display = string.IsNullOrEmpty(prompt) ? DisplayStyle.None : DisplayStyle.Flex;
+                _holdBar.style.display = DisplayStyle.None;
+                if (!string.IsNullOrEmpty(prompt)) _promptLabel.text = $"[{GameInput.DisplayBinding(GameInput.Interact)}]  {prompt}";
+            }
         }
 
         /// <summary>Rebuilds the task rows only when something changed (4x per second at most).</summary>
         void UpdateTasks()
         {
             _mission.text = MissionTracker.CurrentTitle;
-            if (Time.unscaledTime >= _nextObjectiveRefresh)
+            if (Time.unscaledTime < _nextObjectiveRefresh) { UpdateMarker(); return; }
+            _nextObjectiveRefresh = Time.unscaledTime + 0.25f;
+            var list = MissionTracker.CurrentObjectives();
+            int doneCount = 0, required = 0;
+            _waypoint = null;
+            int currentIndex = -1;
+            var sig = new System.Text.StringBuilder();
+            for (int i = 0; i < list.Count; i++)
             {
-                _nextObjectiveRefresh = Time.unscaledTime + 0.25f;
-                var list = new List<(string text, float progress, bool done, Vector3? waypoint)>(MissionTracker.CurrentObjectives());
-                int doneCount = 0;
-                _waypoint = null;
-                int currentIndex = -1;
-                var sig = new System.Text.StringBuilder();
+                var v = list[i];
+                if (!v.optional) { required++; if (v.done) doneCount++; }
+                if (!v.done && currentIndex < 0 && !v.optional) { currentIndex = i; _waypoint = v.waypoint; }
+                sig.Append(v.text).Append(v.done).Append(v.elsewhere).Append(Mathf.RoundToInt(v.progress * 20f));
+            }
+            if (currentIndex < 0) for (int i = 0; i < list.Count; i++) if (!list[i].done) { currentIndex = i; _waypoint = list[i].waypoint; break; }
+            bool campaign = MissionTracker.CampaignActive;
+            UiKit.SetFill(_chapterFill, required > 0 && campaign ? doneCount / (float)required : 0f);
+            _chapterFill.parent.style.display = campaign ? DisplayStyle.Flex : DisplayStyle.None;
+            _chapterLabel.text = campaign ? $"{doneCount}/{required}" : "";
+            _hint.style.display = campaign ? DisplayStyle.Flex : DisplayStyle.None;
+            if (sig.ToString() != _objectiveSignature)
+            {
+                _objectiveSignature = sig.ToString();
+                _objectives.Clear();
                 for (int i = 0; i < list.Count; i++)
                 {
-                    if (list[i].done) doneCount++;
-                    else if (currentIndex < 0) { currentIndex = i; _waypoint = list[i].waypoint; }
-                    sig.Append(list[i].text).Append(list[i].done).Append(Mathf.RoundToInt(list[i].progress * 20f));
-                }
-                bool campaign = GameSession.Mode == GameMode.Campaign || GameSession.Mode == GameMode.None;
-                UiKit.SetFill(_chapterFill, list.Count > 0 && campaign ? doneCount / (float)list.Count : 0f);
-                _chapterFill.parent.style.display = campaign ? DisplayStyle.Flex : DisplayStyle.None;
-                _chapterLabel.text = campaign ? $"{doneCount}/{list.Count}" : "";
-                if (sig.ToString() != _objectiveSignature)
-                {
-                    _objectiveSignature = sig.ToString();
-                    _objectives.Clear();
-                    for (int i = 0; i < list.Count; i++)
+                    var v = list[i];
+                    var row = UiKit.Box(_objectives, "eh-obj-row");
+                    if (i == currentIndex) row.AddToClassList("eh-obj-row--current");
+                    UiKit.Text(row, v.done ? "+" : i == currentIndex ? ">" : v.optional ? "o" : "-", "eh-obj-icon");
+                    var col = UiKit.Box(row, "eh-col", "eh-grow");
+                    string text = v.optional ? Loc.T("HUD_OPTIONAL", v.text) : v.text;
+                    if (v.elsewhere != null) text += "  [" + v.elsewhere + "]";
+                    var label = UiKit.Text(col, text, "eh-small");
+                    label.style.whiteSpace = WhiteSpace.Normal;
+                    if (v.done) label.AddToClassList("eh-ok");
+                    else if (v.optional) label.AddToClassList("eh-optional");
+                    if (!v.done && v.progress > 0f && v.progress < 1f)
                     {
-                        var (text, progress, done, _) = list[i];
-                        var row = UiKit.Box(_objectives, "eh-obj-row");
-                        if (i == currentIndex) row.AddToClassList("eh-obj-row--current");
-                        UiKit.Text(row, done ? "+" : i == currentIndex ? ">" : "-", "eh-obj-icon");
-                        var col = UiKit.Box(row, "eh-col", "eh-grow");
-                        var label = UiKit.Text(col, text, "eh-small");
-                        label.style.whiteSpace = WhiteSpace.Normal;
-                        if (done) label.AddToClassList("eh-ok");
-                        if (!done && progress > 0f && progress < 1f)
-                        {
-                            var bar = UiKit.Bar(col, out var fill);
-                            bar.style.height = 4;
-                            bar.style.marginTop = 2;
-                            UiKit.SetFill(fill, progress);
-                        }
+                        var bar = UiKit.Bar(col, out var fill);
+                        bar.style.height = 4;
+                        bar.style.marginTop = 2;
+                        UiKit.SetFill(fill, v.progress);
                     }
                 }
             }
@@ -298,7 +352,7 @@ namespace EventHorizon.UI
             float dist = Vector3.Distance(_player.transform.position, _waypoint.Value);
             if (dist < 4f) { _marker.style.display = DisplayStyle.None; return; }
             _marker.style.display = DisplayStyle.Flex;
-            _markerLabel.text = $"{dist:0} m";
+            _markerLabel.text = Loc.T("HUD_METRES", dist.ToString("0"));
 
             var view = cam.WorldToViewportPoint(target);
             bool behind = view.z < 0f;
@@ -311,9 +365,37 @@ namespace EventHorizon.UI
             _marker.EnableInClassList("eh-marker--edge", behind || clamped.x != view.x || clamped.y != view.y);
         }
 
-        void OnDestroy()
+        /// <summary>Name and role over colonists within 18 m.</summary>
+        void UpdateNametags()
         {
-            if (s_instance == this) s_instance = null;
+            var cam = Camera.main;
+            var size = _root.layout.size;
+            foreach (var npc in Npc.All)
+            {
+                if (!_nametags.TryGetValue(npc, out var tag))
+                {
+                    tag = UiKit.Box(_tags, "eh-nametag");
+                    tag.pickingMode = PickingMode.Ignore;
+                    UiKit.Text(tag, npc.DisplayName, "eh-nametag-name");
+                    UiKit.Text(tag, npc.Role, "eh-nametag-role");
+                    _nametags[npc] = tag;
+                }
+                bool visible = false;
+                if (cam != null && _player != null && !float.IsNaN(size.x) && size.x > 0f)
+                {
+                    float d = Vector3.Distance(_player.transform.position, npc.transform.position);
+                    var vp = cam.WorldToViewportPoint(npc.transform.position + Vector3.up * 2.25f);
+                    visible = d < 18f && vp.z > 0f && vp.x > 0f && vp.x < 1f && vp.y > 0f && vp.y < 1f;
+                    if (visible)
+                    {
+                        tag.style.left = vp.x * size.x - 90f;
+                        tag.style.top = (1f - vp.y) * size.y - 40f;
+                        tag.style.width = 180f;
+                        tag.style.opacity = Mathf.Clamp01((18f - d) / 4f);
+                    }
+                }
+                tag.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
     }
 }

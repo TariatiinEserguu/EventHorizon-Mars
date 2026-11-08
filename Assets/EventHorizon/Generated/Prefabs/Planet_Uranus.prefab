@@ -101,6 +101,7 @@ MonoBehaviour:
   title: Uranus
   facts: An ice giant tipped on its side (98 deg axial tilt). Methane in its atmosphere absorbs red light, giving it a cyan colour.
   eventId: observe_uranus
+  key: Uranus
 --- !u!1 &6888921158176877317
 GameObject:
   m_ObjectHideFlags: 0

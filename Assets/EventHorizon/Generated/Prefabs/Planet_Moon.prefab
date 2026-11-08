@@ -101,6 +101,7 @@ MonoBehaviour:
   title: Moon
   facts: 3,474 km across, tidally locked to Earth. The dark maria are ancient lava plains; the bright highlands are heavily cratered crust. Relief here comes from LRO laser altimetry.
   eventId: observe_moon
+  key: Moon
 --- !u!1 &631923981098570274
 GameObject:
   m_ObjectHideFlags: 0

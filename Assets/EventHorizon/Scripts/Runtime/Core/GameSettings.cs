@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace EventHorizon.Core
 {
@@ -19,6 +20,7 @@ namespace EventHorizon.Core
         public Controls controls = new();
         public Gameplay gameplay = new();
         public Accessibility accessibility = new();
+        public LanguageSettings language = new();
 
         [Serializable]
         public class Graphics
@@ -60,6 +62,8 @@ namespace EventHorizon.Core
             public Difficulty difficulty = Difficulty.Standard;
             public TutorialMode tutorial = TutorialMode.Basic;
             public bool subtitles = true;
+            [Tooltip("Seconds per subtitle line are multiplied by this (slower readers can raise it).")]
+            public float subtitleSpeed = 1f;
             /// <summary>Game seconds per real second at "normal" speed.</summary>
             public float simulationSpeed = 60f;
             public bool firstPerson = true;

@@ -282,6 +282,7 @@ MonoBehaviour:
   title: Venus
   facts: Nearly Earth's size, but buried under a 92-bar CO2 atmosphere with sulfuric-acid clouds. The surface is ~465 C, hotter than Mercury. It spins backwards.
   eventId: observe_venus
+  key: Venus
 --- !u!1 &7448295390502065254
 GameObject:
   m_ObjectHideFlags: 0

@@ -191,6 +191,7 @@ MonoBehaviour:
   title: Mercury
   facts: 'Smallest planet: 4,879 km across. No real atmosphere, so its surface swings from ~430 C by day to ~-180 C at night. A year lasts 88 days.'
   eventId: observe_mercury
+  key: Mercury
 --- !u!1 &7803579298170722888
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using EventHorizon.Core;
 using EventHorizon.Astronaut;
 using EventHorizon.Interaction;
 using UnityEngine;
@@ -30,9 +31,10 @@ namespace EventHorizon.Colony
         {
             get
             {
-                if (_grid == null) return $"{resource} tank (offline)";
-                string level = $"{resource}: {_grid.Amount(resource):0} / {_grid.Capacity(resource):0} kg";
-                return resource == ResourceType.Oxygen ? $"Refill suit oxygen ({level})" : level;
+                string res = Loc.T("RES_" + resource.ToString().ToUpperInvariant());
+                if (_grid == null) return Loc.T("PROMPT_TANK_OFFLINE", res);
+                string level = Loc.T("PROMPT_TANK_LEVEL", res, _grid.Amount(resource).ToString("0"), _grid.Capacity(resource).ToString("0"));
+                return resource == ResourceType.Oxygen ? Loc.T("PROMPT_REFILL", level) : level;
             }
         }
 

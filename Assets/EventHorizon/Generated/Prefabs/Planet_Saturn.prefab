@@ -372,6 +372,7 @@ MonoBehaviour:
   title: Saturn
   facts: Its rings are mostly water ice, 280,000 km across but often only ~10 m thick. Saturn is less dense than water.
   eventId: observe_saturn
+  key: Saturn
 --- !u!1 &9102469668220533206
 GameObject:
   m_ObjectHideFlags: 0

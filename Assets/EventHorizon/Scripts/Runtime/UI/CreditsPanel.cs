@@ -25,9 +25,9 @@ namespace EventHorizon.UI
             Element.AddToClassList("eh-panel--glass");
 
             var head = UiKit.Box(Element, "eh-row");
-            UiKit.Text(head, "CREDITS", "eh-panel-title");
+            UiKit.Text(head, Loc.T("MENU_CREDITS"), "eh-panel-title");
             UiKit.Box(head, "eh-spacer");
-            UiKit.Small(head, "BACK", () => { UiAudio.Back(); onBack?.Invoke(); });
+            UiKit.Small(head, Loc.T("BTN_BACK"), () => { UiAudio.Back(); onBack?.Invoke(); });
 
             var viewport = UiKit.Box(Element, "eh-grow");
             viewport.style.overflow = Overflow.Hidden;
@@ -38,23 +38,26 @@ namespace EventHorizon.UI
             _scroll.style.alignItems = Align.Center;
 
             Section("EVENT HORIZON: MARS", null, big: true);
-            Line("Created for the 2026 NASA Hackathon");
-            Section("CREATED BY", "Tariatiin Eserguu");
-            Section("PROGRAMMING", "Tariatiin Eserguu");
-            Section("DESIGN", "Tariatiin Eserguu");
-            Section("STORY AND LORE", "Tariatiin Eserguu");
-            Section("SCIENTIFIC REFERENCES", null);
+            Line(Loc.T("CREDITS_HACKATHON"));
+            Section(Loc.T("CREDITS_CREATED_BY"), "Tariatiin Eserguu");
+            Section(Loc.T("CREDITS_PROGRAMMING"), "Tariatiin Eserguu");
+            Section(Loc.T("CREDITS_DESIGN"), "Tariatiin Eserguu");
+            Section(Loc.T("CREDITS_STORY"), "Tariatiin Eserguu");
+            Section(Loc.T("CREDITS_TRANSLATION"), Loc.T("CREDITS_TRANSLATION_BODY"));
+            Section(Loc.T("CREDITS_REFERENCES"), null);
             foreach (var r in References) Line(r);
-            Section("MUSIC AND SOUND", "Sound effects: Kenney (kenney.nl), CC0");
-            Section("FONTS", null);
+            Section(Loc.T("CREDITS_SOUND"), Loc.T("CREDITS_SOUND_BODY"));
+            Section(Loc.T("CREDITS_FONTS"), null);
             Line("Rajdhani - Indian Type Foundry, SIL Open Font License 1.1");
             Line("Share Tech Mono - Carrois Type Design, SIL Open Font License 1.1");
-            Section("3D ASSETS, TEXTURES AND LICENSES", null);
+            Line("Fira Sans Condensed, Fira Mono - The Mozilla Foundation and Telefonica S.A., SIL Open Font License 1.1");
+            Section(Loc.T("CREDITS_ASSETS"), null);
             foreach (var line in GameCredits.Load().Split('\n'))
                 if (!string.IsNullOrWhiteSpace(line) && !line.StartsWith("THIRD-PARTY")) Line(line.Trim());
-            Section("SPECIAL THANKS", "NASA, JPL and the Mars 2020 team for making their science and models public.");
-            Line("Everyone who shares free assets with the game-development community.");
-            Section("", "Humanity has reached another world. Now it must learn to survive.");
+            Section(Loc.T("CREDITS_THANKS"), Loc.T("CREDITS_THANKS_1"));
+            Line(Loc.T("CREDITS_THANKS_2"));
+            Line(Loc.T("CREDITS_INSPIRATION"));
+            Section("", Loc.T("NEW_QUOTE"));
 
             _offset = 600f;
             _tick = Element.schedule.Execute(() =>
@@ -76,6 +79,10 @@ namespace EventHorizon.UI
             "Landis (1996), Dust obscuration of Mars solar arrays (Mars Pathfinder)",
             "Rodriguez-Manfredi et al. (2023), MEDA weather at Jezero crater",
             "Schwarzschild (1916); Misner, Thorne & Wheeler, Gravitation",
+            "Bardeen, Press & Teukolsky (1972), Rotating black holes: ISCO and photon orbits",
+            "Kerr (1963); Penrose (1969), energy extraction from rotating black holes",
+            "Scholtz & Unwin (2020), What if Planet 9 is a primordial black hole?",
+            "Paczynski (1986), gravitational microlensing; Turyshev & Toth (2020), solar gravitational lens",
             "Eddington, Dyson & Davidson (1920), deflection of starlight",
         };
 

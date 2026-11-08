@@ -75,7 +75,7 @@ namespace EventHorizon.Game
                 Directory.CreateDirectory(Dir);
                 var state = GameSession.State;
                 WorldState.Capture(state);
-                state.saveName = string.IsNullOrWhiteSpace(saveName) ? $"Sol {state.sol} - {state.missionTitle}" : saveName.Trim();
+                state.saveName = string.IsNullOrWhiteSpace(saveName) ? Loc.T("SAVE_DEFAULT_NAME", state.sol, state.missionTitle) : saveName.Trim();
                 state.scene = SceneManager.GetActiveScene().name;
                 GameSession.MarkSaved();
                 state.savedAtUtc = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
@@ -140,6 +140,13 @@ namespace EventHorizon.Game
     {
         public static void Capture(SaveData s)
         {
+            // Only the colony scene owns the colony's world state; saving in orbit or the lab keeps what was captured
+            // when the player left the colony.
+            if (SceneManager.GetActiveScene().name != Scenes.MarsColony)
+            {
+                s.missionTitle = MissionTracker.CurrentTitle;
+                return;
+            }
             var env = MarsEnvironment.Instance;
             if (env != null)
             {

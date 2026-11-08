@@ -70,6 +70,7 @@ MonoBehaviour:
   title: Relay dish
   facts: Radio signals take 3 to 22 minutes to cross between Mars and Earth, depending on where the planets are. Every 26 months the Sun sits between them and blocks contact for about two weeks.
   eventId: inspect_relay
+  key: relay
 --- !u!1001 &79855944826190646
 PrefabInstance:
   m_ObjectHideFlags: 0

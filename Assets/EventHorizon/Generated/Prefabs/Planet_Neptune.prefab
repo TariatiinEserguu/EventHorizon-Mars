@@ -281,6 +281,7 @@ MonoBehaviour:
   title: Neptune
   facts: 'The windiest planet: supersonic winds up to ~2,100 km/h. Methane makes it blue. One orbit takes 165 years.'
   eventId: observe_neptune
+  key: Neptune
 --- !u!1 &6289536196054038863
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using EventHorizon.Core;
 using EventHorizon.Astronaut;
 using EventHorizon.UI;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace EventHorizon.Game
             if ((_player.position - transform.position).sqrMagnitude > radius * radius) return;
             _fired = true;
             GameEvents.Raise(eventId);
-            if (!string.IsNullOrEmpty(message)) Hud.Toast(message);
+            if (!string.IsNullOrEmpty(message)) Hud.Toast(Loc.TOr(message, message));
         }
     }
 }

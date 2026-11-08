@@ -71,6 +71,7 @@ MonoBehaviour:
   title: Mars 2020 Perseverance Rover
   facts: 'Landed in Jezero crater on 18 Feb 2021. Mass 1,025 kg, about 3 m long. Powered by an MMRTG: ~110 W electrical from the heat of plutonium-238 decay. Its MOXIE experiment made the first oxygen on another planet, up to 12 g per hour.'
   eventId: inspect
+  key: Perseverance
 --- !u!205 &8438043515256738692
 LODGroup:
   m_ObjectHideFlags: 0

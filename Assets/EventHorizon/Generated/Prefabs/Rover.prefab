@@ -71,6 +71,7 @@ MonoBehaviour:
   title: Space Exploration Vehicle
   facts: 'NASA''s SEV concept: a pressurised rover that two astronauts can live in for up to two weeks, with suit ports on the back so they can step out without an airlock.'
   eventId: inspect
+  key: Rover
 --- !u!205 &3176658031509962903
 LODGroup:
   m_ObjectHideFlags: 0

@@ -30,6 +30,7 @@ namespace EventHorizon.UI
             root.pickingMode = PickingMode.Ignore;
             ApplyAccessibility(root);
             SettingsService.Changed += () => { if (doc != null) ApplyAccessibility(doc.rootVisualElement); };
+            Loc.Changed += () => { if (doc != null) ApplyAccessibility(doc.rootVisualElement); };
             return doc;
         }
 
@@ -41,6 +42,8 @@ namespace EventHorizon.UI
             foreach (var cls in new[] { "cb-protanopia", "cb-deuteranopia", "cb-tritanopia" }) root.RemoveFromClassList(cls);
             if (a.colorblind != ColorblindMode.Off) root.AddToClassList("cb-" + a.colorblind.ToString().ToLowerInvariant());
             root.EnableInClassList("eh-simple", a.simplifiedInterface);
+            // Language class: Mongolian swaps in the Cyrillic fonts (see EventHorizon.uss), every language gets its own hook.
+            foreach (var l in Loc.Languages) root.EnableInClassList("lang-" + l.code, l.code == Loc.Current);
         }
 
         /// <summary>UI Toolkit routes pointer and keyboard input through the Input System's UI module.</summary>

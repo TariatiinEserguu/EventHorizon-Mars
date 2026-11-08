@@ -1,3 +1,4 @@
+using EventHorizon.Core;
 using EventHorizon.Interaction;
 using UnityEngine;
 
@@ -67,7 +68,7 @@ namespace EventHorizon.Colony
             OutputKgPerHour = stored / dt * 3600f;
         }
 
-        public string Prompt => $"{(running ? "Stop" : "Start")} oxygen plant ({OutputKgPerHour * 1000f:0} g/h)";
+        public string Prompt => Loc.T(running ? "PROMPT_O2_STOP" : "PROMPT_O2_START", (OutputKgPerHour * 1000f).ToString("0"));
         public bool CanInteract(GameObject user) => true;
         public void Interact(GameObject user)
         {

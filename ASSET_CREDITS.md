@@ -21,7 +21,7 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 | Space Exploration Vehicle (3D model) | NASA | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Exploration%20Vehicle) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Pressurized exploration rover parked at the colony (replaces the toy rover) |
 | Deep Space Network 34-meter antenna (3D model) | NASA/JPL | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Deep%20Space%20Network%2034-meter) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Colony relay antenna (scaled down), replaces the toy satellite dish |
 | Mars Reconnaissance Orbiter (3D model) | NASA/JPL-Caltech | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Mars%20Reconnaissance%20Orbiter%20(MRO)%20(A)) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Orbiter crossing the main-menu sky |
-| Rajdhani and Share Tech Mono fonts | Indian Type Foundry; Carrois Type Design | [github.com](https://github.com/google/fonts/tree/main/ofl/rajdhani), [more](https://github.com/google/fonts/tree/main/ofl/sharetechmono) | [SIL Open Font License 1.1](https://openfontlicense.org) | Yes | All interface text |
+| Rajdhani, Share Tech Mono, Fira Sans Condensed and Fira Mono fonts | Indian Type Foundry; Carrois Type Design; The Mozilla Foundation and Telefonica S.A. | [github.com](https://github.com/google/fonts/tree/main/ofl/rajdhani), [more](https://github.com/google/fonts/tree/main/ofl/sharetechmono), [more](https://github.com/google/fonts/tree/main/ofl/firasanscondensed), [more](https://github.com/google/fonts/tree/main/ofl/firamono) | [SIL Open Font License 1.1](https://openfontlicense.org) | Yes | All interface text; Fira provides Mongolian Cyrillic and scientific symbols |
 | CGI Moon Kit: LRO color mosaic and LOLA elevation | NASA's Scientific Visualization Studio (Ernie Wright, Noah Petro) | [svs.gsfc.nasa.gov](https://svs.gsfc.nasa.gov/4720) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Moon surface color and crater relief (normal map derived from the LOLA elevation) |
 | Gateway Core (3D model) | NASA | [github.com](https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Gateway) | [NASA Media Usage Guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Orbital research station above Mars |
 | MOLA global elevation map of Mars (MEGDR, 4 pixels/degree) | NASA/GSFC Mars Orbiter Laser Altimeter team (Smith et al.), via the PDS Geosciences Node | [pds-geosciences.wustl.edu](https://pds-geosciences.wustl.edu/missions/mgs/megdr.html) | [NASA Planetary Data System (public domain)](https://www.nasa.gov/nasa-brand-center/images-and-media/) | Yes | Real Mars relief (normal map) on the planet seen from orbit and in the menu |
@@ -46,7 +46,7 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 | Space Exploration Vehicle (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources; preview shows no NASA insignia. NASA media terms apply. |
 | Deep Space Network 34-meter antenna (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply. |
 | Mars Reconnaissance Orbiter (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply. |
-| Rajdhani and Share Tech Mono fonts | Yes | Yes | 2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts. |
+| Rajdhani, Share Tech Mono, Fira Sans Condensed and Fira Mono fonts | Yes | Yes | 2026-11-09: OFL.txt in each Google Fonts folder; license files bundled next to the fonts. Fira covers Cyrillic including the Mongolian letters Ө and Ү. |
 | CGI Moon Kit: LRO color mosaic and LOLA elevation | Yes | Yes | 2026-11-09: SVS help page states all content is in the public domain unless otherwise noted; credit requested. |
 | Gateway Core (3D model) | Yes | Yes | 2026-11-09: official NASA GitHub repository of 3D resources. NASA media terms apply; check decals for insignia. |
 | MOLA global elevation map of Mars (MEGDR, 4 pixels/degree) | Yes | Yes | 2026-11-09: NASA PDS archival data product (US government work); credit to the MOLA team requested. |
@@ -61,7 +61,7 @@ Every third-party file in `Assets/ThirdParty/` comes from one of the sources bel
 - Space Exploration Vehicle model: NASA (NASA-3D-Resources).
 - Deep Space Network antenna model: NASA/JPL (NASA-3D-Resources).
 - Mars Reconnaissance Orbiter model: NASA/JPL-Caltech (NASA-3D-Resources).
-- Rajdhani (Indian Type Foundry) and Share Tech Mono (Carrois Type Design), SIL Open Font License 1.1.
+- Rajdhani (Indian Type Foundry), Share Tech Mono (Carrois Type Design), Fira Sans Condensed and Fira Mono (The Mozilla Foundation and Telefonica S.A.), SIL Open Font License 1.1.
 - Moon color and elevation: NASA's Scientific Visualization Studio, CGI Moon Kit (LRO LROC WAC, LOLA).
 - Gateway model: NASA (NASA-3D-Resources).
 - Mars topography: MGS MOLA Team, NASA/GSFC (PDS MEGDR).

@@ -342,6 +342,7 @@ namespace EventHorizon.EditorTools
                     glow.GetComponent<MeshRenderer>().shadowCastingMode = ShadowCastingMode.Off;
                 }
                 var info = root.AddComponent<ScienceInspectable>();
+                info.key = body.name;
                 info.title = body.name;
                 info.facts = Facts(body.name);
                 info.eventId = "observe_" + body.name.ToLowerInvariant();
@@ -443,6 +444,7 @@ namespace EventHorizon.EditorTools
             go.AddComponent<MeshRenderer>().sharedMaterial = mat;
             go.transform.localScale = Vector3.one * size;
             var info = go.AddComponent<ScienceInspectable>();
+            info.key = name.Replace(' ', '_');
             info.title = name;
             info.facts = facts;
             return go;
@@ -544,6 +546,7 @@ namespace EventHorizon.EditorTools
                 ceres.name = "Ceres";
                 SetSize(ceres, 1.6f);
                 var info = ceres.GetComponent<ScienceInspectable>();
+                info.key = "Ceres";
                 info.title = "Ceres (dwarf planet)";
                 info.facts = "The largest object in the asteroid belt, 940 km across, holding about a third of the belt's mass. NASA's Dawn found bright salt deposits in Occator crater from briny water below. (Shown with lunar textures as a stand-in.)";
                 foreach (var r in ceres.GetComponentsInChildren<Renderer>()) r.sharedMaterial = mats[0];
@@ -605,6 +608,7 @@ namespace EventHorizon.EditorTools
             orbit.startAngle = 110f;
             comet.transform.position = Quaternion.Euler(24f, 110f, 0f) * Vector3.forward * 200f;
             var info = comet.AddComponent<ScienceInspectable>();
+            info.key = "Comet";
             info.title = "Comet";
             info.facts = "A dirty snowball a few km across. Near the Sun its ices sublimate: the blue ion tail is pushed straight away from the Sun by the solar wind, the curved dust tail trails along the orbit.";
             return comet;
@@ -694,6 +698,7 @@ namespace EventHorizon.EditorTools
             site.GetComponent<MeshRenderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>(MatPath("Beacon"));
             site.AddComponent<BeaconPulse>();
             var siteInfo = site.AddComponent<ScienceInspectable>();
+            siteInfo.key = "Jezero";
             siteInfo.title = "ARES-1 // Jezero crater";
             siteInfo.facts = "A 45 km crater that once held a lake. Its river delta is where Perseverance has searched for signs of ancient life since 2021, and where the ARES-1 colony stands in 2189.";
             targets.Add(site.transform);
@@ -714,7 +719,7 @@ namespace EventHorizon.EditorTools
                 mo.startAngle = prefab.Contains("Phobos") ? -30f : 50f;
                 m.transform.position = Quaternion.Euler(mo.inclination, mo.startAngle, 0f) * Vector3.forward * r;
                 var info = m.AddComponent<ScienceInspectable>();
-                info.title = label; info.facts = facts;
+                info.key = label; info.title = label; info.facts = facts;
                 targets.Add(m.transform);
                 distances.Add(prefab.Contains("Phobos") ? 9f : 6f);
                 sl.occluders.Add(m.transform);
@@ -729,7 +734,8 @@ namespace EventHorizon.EditorTools
                 station.transform.position = Quaternion.Euler(25f, -15f, 0f) * Vector3.forward * 84f;
                 var info = station.GetComponent<ScienceInspectable>();
                 if (info == null) info = station.AddComponent<ScienceInspectable>();
-                info.title = "ARES Orbital Research Station";
+                info.key = "Station";
+                info.title = "Olympus Observatory";
                 info.facts = "A Gateway-class station in a 1,400 km orbit: power and propulsion element, habitation modules and a docking hub for landers to and from Jezero. (Model: NASA Gateway; shown enlarged.)";
                 targets.Add(station.transform);
                 distances.Add(7f);
@@ -742,10 +748,43 @@ namespace EventHorizon.EditorTools
                 mo.center = mars.transform; mo.radius = 66f; mo.periodHours = 1.87f; mo.timeScale = 0.25f; mo.inclination = 93f; mo.startAngle = 20f;
                 mro.transform.position = Quaternion.Euler(93f, 20f, 0f) * Vector3.forward * 66f;
                 var info = mro.AddComponent<ScienceInspectable>();
+                info.key = "MRO";
                 info.title = "Mars Reconnaissance Orbiter";
                 info.facts = "In orbit since 2006 in a near-polar 255 x 320 km orbit. Its HiRISE camera resolves objects ~1 m across; it also relays rover data to Earth. (Shown enlarged.)";
                 targets.Add(mro.transform);
                 distances.Add(3f);
+            }
+
+            // PROJECT HORIZON's abandoned data relay (chapter 8): a small dead satellite in a high orbit.
+            {
+                var relay = new GameObject("Relay_Horizon");
+                var hull = AssetDatabase.LoadAssetAtPath<Material>(MatPath("SpacecraftHull"));
+                var parts = new[]
+                {
+                    (PrimitiveType.Cube, Vector3.zero, new Vector3(1f, 1f, 1.4f)),
+                    (PrimitiveType.Cube, new Vector3(2.2f, 0f, 0f), new Vector3(3f, 0.05f, 1.1f)),
+                    (PrimitiveType.Cube, new Vector3(-2.2f, 0f, 0f), new Vector3(3f, 0.05f, 1.1f)),
+                    (PrimitiveType.Cylinder, new Vector3(0f, 0.9f, 0f), new Vector3(1.4f, 0.06f, 1.4f)),
+                };
+                foreach (var (type, pos, scale) in parts)
+                {
+                    var p = GameObject.CreatePrimitive(type);
+                    Object.DestroyImmediate(p.GetComponent<Collider>());
+                    p.transform.SetParent(relay.transform, false);
+                    p.transform.localPosition = pos;
+                    p.transform.localScale = scale;
+                    if (hull != null) p.GetComponent<Renderer>().sharedMaterial = hull;
+                }
+                relay.transform.localScale = Vector3.one * 0.35f;
+                var mo = relay.AddComponent<OrbitMotion>();
+                mo.center = mars.transform; mo.radius = 140f; mo.periodHours = 9f; mo.timeScale = 0.2f; mo.inclination = 28f; mo.startAngle = 160f;
+                relay.transform.position = Quaternion.Euler(28f, 160f, 0f) * Vector3.forward * 140f;
+                var info = relay.AddComponent<ScienceInspectable>();
+                info.key = "Relay";
+                info.title = "HORIZON relay";
+                info.facts = "";
+                targets.Add(relay.transform);
+                distances.Add(4f);
             }
 
             var cam = MakeCamera(out var orbitCam);
@@ -774,6 +813,7 @@ namespace EventHorizon.EditorTools
             {
                 orbitCam.targets = new[] { bh.transform };
                 var info = bh.AddComponent<ScienceInspectable>();
+                info.key = "BlackHole";
                 info.title = "Black hole";
                 info.facts = "Light bends around it: the far side of the accretion disk appears over the top, an Einstein ring wraps beneath, and the approaching side of the disk shines brighter (Doppler beaming).";
             }
@@ -781,6 +821,11 @@ namespace EventHorizon.EditorTools
             orbitCam.distanceRange = new Vector2(20f, 600f);
             orbitCam.pitch = 4f;
             orbitCam.yaw = 0f;
+            var lab = new GameObject("Black Hole Lab").AddComponent<BlackHoleLab>();
+            lab.blackHole = bh != null ? bh.GetComponent<BlackHole>() : null;
+            lab.orbitCamera = orbitCam;
+            lab.lineMaterial = AssetDatabase.LoadAssetAtPath<Material>(MatPath("LabLines"));
+            lab.podMaterial = AssetDatabase.LoadAssetAtPath<Material>(MatPath("SpacecraftHull"));
             new GameObject("Research Console").AddComponent<BlackHoleLabUI>();
             EditorSceneManager.SaveScene(scene, "Assets/EventHorizon/Scenes/BlackHoleLab.unity");
             Debug.Log("[Event Horizon] Saved Scenes/BlackHoleLab.unity");

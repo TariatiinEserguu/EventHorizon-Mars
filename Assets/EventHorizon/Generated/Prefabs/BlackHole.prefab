@@ -106,6 +106,17 @@ MonoBehaviour:
   massSolar: 4300000
   spin: 0
   diskIntensity: 3
+  diskTemperature: 4300
+  diskDensity: 0.8
+  hotSpot: 0
+  frameDragging: 1
+  sourceDirection: {x: 0, y: 0, z: 1}
+  sourceBrightness: 0
+  sourceSizeDeg: 0.6
+  simulationSpeed: 1
+  paused: 0
   boundRadius: 40
   diskOuter: 14
   steps: 300
+  stepScale: 1
+  detail: 3

@@ -26,7 +26,7 @@ namespace EventHorizon.Game
                 WorldState.Apply(state);
                 GameSession.RestoreWorld = false;
                 Hud.Ensure();
-                Hud.Toast($"Loaded  //  {state.saveName}");
+                Hud.Toast(Loc.T("TOAST_LOADED", state.saveName));
             }
             else
             {
@@ -97,14 +97,29 @@ namespace EventHorizon.Game
 
         static void ShowIntro(SaveData state)
         {
-            var ch = Campaign.Get(state.chapter);
-            Hud.ShowInfo($"Chapter {ch.number:00} // {ch.title}", ch.summary, 12f);
+            var ch = Story.Story.MainQuest(state.chapter);
+            if (state.chapter > 0) Hud.ShowInfo($"{MissionTracker.ChapterLabel(ch.chapter)} // {Loc.T(ch.TitleKey)}", Loc.T(ch.DescKey), 12f);
             var tut = state.tutorial;
             if (tut == TutorialMode.None) return;
-            Hud.Toast($"[{GameInput.DisplayBinding(GameInput.Move)}] move   [MOUSE] look   [{GameInput.DisplayBinding(GameInput.Run)}] run");
-            Hud.Toast($"[{GameInput.DisplayBinding(GameInput.Interact)}] interact   [{GameInput.DisplayBinding(GameInput.ToggleView)}] camera   [ESC] pause");
+            // In the prologue the controls appear once the player has landed, not over the descent.
+            if (state.chapter == 0 && FindAnyObjectByType<SessionBootstrap>() is SessionBootstrap boot) { boot.StartCoroutine(TutorialAfterLanding(tut)); return; }
+            ShowControls(tut);
+        }
+
+        static System.Collections.IEnumerator TutorialAfterLanding(TutorialMode tut)
+        {
+            yield return null;
+            while (Story.Cinematic.IsPlaying || !Story.Story.Flag("pro_landed")) yield return null;
+            yield return new WaitForSeconds(2f);
+            ShowControls(tut);
+        }
+
+        static void ShowControls(TutorialMode tut)
+        {
+            Hud.Toast(Loc.T("TUT_MOVE", GameInput.DisplayBinding(GameInput.Move), GameInput.DisplayBinding(GameInput.Run)));
+            Hud.Toast(Loc.T("TUT_INTERACT", GameInput.DisplayBinding(GameInput.Interact), GameInput.DisplayBinding(GameInput.ToggleView), GameInput.DisplayBinding(GameInput.Missions)));
             if (tut == TutorialMode.Full)
-                Hud.Toast("Watch your suit oxygen (bottom left). Refill it at the oxygen tank next to the habitat.");
+                Hud.Toast(Loc.T("TUT_OXYGEN"));
         }
     }
 }

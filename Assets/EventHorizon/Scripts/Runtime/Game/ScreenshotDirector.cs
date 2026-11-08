@@ -43,9 +43,42 @@ namespace EventHorizon.Game
             go.AddComponent<ScreenshotDirector>()._dir = dir;
         }
 
+        /// <summary>"-eh-lang mn" runs the tour in another language (without saving it to the player's settings).</summary>
+        static string Language
+        {
+            get
+            {
+                var args = Environment.GetCommandLineArgs();
+                for (int i = 0; i < args.Length - 1; i++)
+                    if (args[i] == "-eh-lang") return args[i + 1];
+                return null;
+            }
+        }
+
+        static bool PrologueOnly => Array.IndexOf(Environment.GetCommandLineArgs(), "-eh-prologue") >= 0;
+
+        /// <summary>"-eh-prologue": captures the landing cinematic and the first moments of the prologue, then quits.</summary>
+        IEnumerator Prologue()
+        {
+            yield return WaitScene(Scenes.MainMenu, 2f);
+            GameSession.StartCampaign(new SaveData { tutorial = TutorialMode.Basic }, 0);
+            while (SceneManager.GetActiveScene().name != Scenes.MarsColony || FindAnyObjectByType<SceneLoader>() != null) yield return null;
+            foreach (var (wait, file) in new[] { (3.5f, "p1_descent"), (5f, "p2_cockpit"), (5f, "p3_cockpit_late"), (6.5f, "p4_touchdown") })
+            {
+                yield return new WaitForSecondsRealtime(wait);
+                yield return Shot(file);
+            }
+            while (Story.Cinematic.IsPlaying) yield return null;
+            yield return new WaitForSecondsRealtime(4f);
+            yield return Shot("p5_on_mars");
+            Application.Quit();
+        }
+
         IEnumerator Start()
         {
             Directory.CreateDirectory(_dir);
+            if (Language != null) Loc.SetLanguage(Language, true, save: false);
+            if (PrologueOnly) { yield return Prologue(); yield break; }
             _report.AppendLine($"EVENT HORIZON: MARS visual test  {DateTime.Now:yyyy-MM-dd HH:mm}");
             _report.AppendLine($"GPU {SystemInfo.graphicsDeviceName} ({SystemInfo.graphicsDeviceType}), {SystemInfo.graphicsMemorySize} MB VRAM; CPU {SystemInfo.processorType}; RAM {SystemInfo.systemMemorySize} MB");
             _report.AppendLine($"Resolution {Screen.width}x{Screen.height}, preset {SettingsService.Current.graphics.preset}, fps limit {SettingsService.Current.graphics.fpsLimit}");
@@ -128,8 +161,28 @@ namespace EventHorizon.Game
                 pause.Pause();
                 yield return new WaitForSecondsRealtime(0.6f);
                 yield return Shot("17_pause_menu");
+                pause.Open("JOURNAL");
+                yield return new WaitForSecondsRealtime(0.6f);
+                yield return Shot("18_journal");
                 pause.Resume();
             }
+
+            // Story: a conversation with subtitles and a science task.
+            var reyes = System.Array.Find(FindObjectsByType<Story.Npc>(), n => n.character == Story.Character.Reyes);
+            if (reyes != null)
+            {
+                View(reyes.transform.position + reyes.transform.forward * 3.2f + Vector3.up * 0.1f, reyes.transform.eulerAngles.y + 180f, 6f);
+                yield return Settle(1.5f);
+                Story.DialoguePlayer.StopAll();
+                Story.DialoguePlayer.Play("PRO_REYES");
+                yield return new WaitForSecondsRealtime(0.8f);
+                yield return Shot("19_dialogue");
+                Story.DialoguePlayer.StopAll();
+            }
+            Story.ExperimentPanel.Open("o2diag");
+            yield return new WaitForSecondsRealtime(0.8f);
+            yield return Shot("19b_experiment");
+            Story.ExperimentPanel.Close();
 
             // Space: planetarium close-ups, Mars orbit, black-hole lab.
             GameSession.StartScience(Scenes.SpaceLab);
@@ -164,6 +217,35 @@ namespace EventHorizon.Game
                 orbitCam.pitch = 3f;
                 yield return new WaitForSecondsRealtime(3f);
                 yield return Shot("41_black_hole_close_spin");
+            }
+            var lab = FindAnyObjectByType<Space.BlackHoleLab>();
+            var labUi = FindAnyObjectByType<BlackHoleLabUI>();
+            if (lab != null && orbitCam != null)
+            {
+                lab.ApplyPreset(Space.BlackHoleLab.Preset.Kerr);
+                orbitCam.distance = 70f;
+                orbitCam.pitch = 28f;
+                lab.orbitStartRs = 12f; lab.orbitSpeedFactor = 0.92f; lab.orbitRadialSpeed = 0f;
+                lab.LaunchOrbit();
+                lab.mode = Space.BlackHoleLab.Mode.Research;
+                labUi?.ShowTab("ORBITS");
+                yield return new WaitForSecondsRealtime(4f);
+                yield return Shot("42_lab_orbits");
+                lab.ApplyPreset(Space.BlackHoleLab.Preset.Schwarzschild);
+                bh.diskDensity = 0.15f;
+                orbitCam.distance = 90f;
+                orbitCam.pitch = 2f;
+                yield return null;
+                lab.AlignSource();
+                lab.mode = Space.BlackHoleLab.Mode.Beginner;
+                labUi?.ShowTab("SIM");
+                yield return new WaitForSecondsRealtime(3f);
+                yield return Shot("43_lab_einstein_ring");
+                lab.SetGrid(true);
+                orbitCam.pitch = 22f;
+                labUi?.ShowTab("GUIDES");
+                yield return new WaitForSecondsRealtime(3f);
+                yield return Shot("44_lab_guides_grid");
             }
             yield return Measure("Black-hole lab");
 

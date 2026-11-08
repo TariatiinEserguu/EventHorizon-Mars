@@ -2,6 +2,7 @@ using EventHorizon.Astronaut;
 using EventHorizon.Colony;
 using EventHorizon.Core;
 using EventHorizon.Game;
+using EventHorizon.Story;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,19 +10,43 @@ namespace EventHorizon.UI
 {
     /// <summary>
     /// Esc during play: darkens the view, freezes simulation time (Time.timeScale = 0) and blocks gameplay input.
-    /// Offers resume, save, load, objectives, inventory, science database, settings, main menu and exit, and asks
-    /// before abandoning unsaved progress.
+    /// Offers resume, save, load, the mission journal, inventory, science database, language, settings, main menu
+    /// and exit, and asks before abandoning unsaved progress. J opens the journal directly.
     /// </summary>
     public class PauseMenu : MonoBehaviour
     {
         UIDocument _doc;
         VisualElement _root, _layer, _menu, _page;
+        string _openPage;
         public static bool IsPaused => GameSession.Paused;
 
         void Start()
         {
             _doc = UiRoot.Create("Pause", 40);
             _root = _doc.rootVisualElement;
+            Build();
+            Loc.Changed += OnLanguage;
+        }
+
+        void OnDestroy()
+        {
+            Loc.Changed -= OnLanguage;
+            if (GameSession.Paused) { Time.timeScale = 1f; AudioListener.pause = false; GameSession.Paused = false; }
+            GameInput.Unblock(this);
+        }
+
+        void OnLanguage()
+        {
+            bool visible = _layer.style.display == DisplayStyle.Flex;
+            string page = _openPage;
+            _root.Clear();
+            Build();
+            _layer.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (page != null) Open(page);
+        }
+
+        void Build()
+        {
             _layer = UiKit.Box(_root, "eh-fill", "eh-vignette");
             _layer.style.display = DisplayStyle.None;
             _layer.pickingMode = PickingMode.Position;
@@ -34,36 +59,62 @@ namespace EventHorizon.UI
             wrap.style.paddingRight = 80;
 
             _menu = UiKit.Box(wrap, "eh-col");
-            _menu.style.width = 380;
-            UiKit.Text(_menu, "SYSTEM PAUSED", "eh-kicker");
+            _menu.style.width = 400;
+            UiKit.Text(_menu, Loc.T("PAUSE_KICKER"), "eh-kicker");
             UiKit.Text(_menu, "ARES-1", "eh-logo-title").style.fontSize = 64;
             UiKit.Divider(_menu);
-            UiKit.Button(_menu, "RESUME", Resume);
-            UiKit.Button(_menu, "SAVE GAME", () =>
+            UiKit.Button(_menu, Loc.T("PAUSE_RESUME"), Resume);
+            UiKit.Button(_menu, Loc.T("PAUSE_SAVE"), () =>
             {
                 // Free Exploration has its own slot, so it never touches campaign saves.
                 if (GameSession.Mode == GameMode.Sandbox)
                 {
-                    bool ok = SaveSystem.Save(SaveSystem.SandboxSlot, "Free Exploration");
-                    Hud.Toast(ok ? "Sandbox saved" : "Save failed: see the log", !ok);
+                    bool ok = SaveSystem.Save(SaveSystem.SandboxSlot, Loc.T("MODE_SANDBOX"));
+                    Hud.Toast(Loc.T(ok ? "TOAST_SANDBOX_SAVED" : "TOAST_SAVE_FAILED"), !ok);
                 }
-                else ShowPage(new SaveLoadPanel(_root, true, ClosePage).Element);
+                else Open("SAVE");
             });
-            UiKit.Button(_menu, "LOAD GAME", () => ShowPage(new SaveLoadPanel(_root, false, ClosePage).Element));
-            UiKit.Button(_menu, "MISSION OBJECTIVES", () => ShowPage(BuildObjectives()));
-            UiKit.Button(_menu, "INVENTORY", () => ShowPage(BuildInventory()));
-            UiKit.Button(_menu, "SCIENTIFIC DATABASE", () => ShowPage(new SciencePanel(ClosePage, allowLaunch: false).Element));
-            UiKit.Button(_menu, "SETTINGS", () => ShowPage(new SettingsPanel(_root, ClosePage).Element));
-            UiKit.Button(_menu, "RETURN TO MAIN MENU", () => ConfirmLeave("RETURN TO MAIN MENU", GameSession.ReturnToMenu));
-            UiKit.Button(_menu, "EXIT GAME", () => ConfirmLeave("EXIT GAME", Quit));
+            UiKit.Button(_menu, Loc.T("PAUSE_LOAD"), () => Open("LOAD"));
+            UiKit.Button(_menu, Loc.T("PAUSE_JOURNAL"), () => Open("JOURNAL"));
+            UiKit.Button(_menu, Loc.T("PAUSE_INVENTORY"), () => Open("INVENTORY"));
+            UiKit.Button(_menu, Loc.T("PAUSE_DATABASE"), () => Open("DATABASE"));
+            UiKit.Button(_menu, Loc.T("PAUSE_LANGUAGE"), () => Open("LANGUAGE"));
+            UiKit.Button(_menu, Loc.T("PAUSE_SETTINGS"), () => Open("SETTINGS"));
+            UiKit.Button(_menu, Loc.T("PAUSE_MAIN_MENU"), () => ConfirmLeave(Loc.T("PAUSE_MAIN_MENU"), GameSession.ReturnToMenu));
+            UiKit.Button(_menu, Loc.T("PAUSE_EXIT"), () => ConfirmLeave(Loc.T("PAUSE_EXIT"), Quit));
 
             _page = UiKit.Box(wrap, "eh-col", "eh-grow");
             _page.style.marginLeft = 40;
         }
 
+        /// <summary>Opens a page by name: SAVE, LOAD, JOURNAL, INVENTORY, DATABASE, LANGUAGE, SETTINGS.</summary>
+        public void Open(string page)
+        {
+            _openPage = page;
+            _page.Clear();
+            VisualElement content = page switch
+            {
+                "SAVE" => new SaveLoadPanel(_root, true, ClosePage).Element,
+                "LOAD" => new SaveLoadPanel(_root, false, ClosePage).Element,
+                "JOURNAL" => new JournalPanel(ClosePage).Element,
+                "INVENTORY" => BuildInventory(),
+                "DATABASE" => new SciencePanel(ClosePage, allowLaunch: false).Element,
+                "LANGUAGE" => BuildLanguage(),
+                _ => new SettingsPanel(_root, ClosePage).Element,
+            };
+            _page.Add(content);
+        }
+
         void Update()
         {
-            if (!GameInput.Pause.WasPressedThisFrame() || TerminalScreen.IsOpen || Time.frameCount == TerminalScreen.LastClosedFrame) return;
+            if (Cinematic.IsPlaying || EndingSequence.IsPlaying) return;
+            if (!GameSession.Paused && GameInput.Missions.WasPressedThisFrame() && !ModalState.Any && GameSession.InGameplay)
+            {
+                Pause();
+                Open("JOURNAL");
+                return;
+            }
+            if (!GameInput.Pause.WasPressedThisFrame() || TerminalScreen.IsOpen || Time.frameCount == TerminalScreen.LastClosedFrame || ModalState.OwnsEscape) return;
             if (!GameSession.Paused) Pause();
             else if (_page.childCount > 0) ClosePage();
             else Resume();
@@ -77,6 +128,7 @@ namespace EventHorizon.UI
             GameInput.Block(this);
             _layer.style.display = DisplayStyle.Flex;
             _menu.Q<Button>()?.Focus();
+            GameInput.UpdateCursor();
         }
 
         public void Resume()
@@ -87,15 +139,14 @@ namespace EventHorizon.UI
             AudioListener.pause = false;
             _layer.style.display = DisplayStyle.None;
             GameInput.Unblock(this);
+            GameInput.UpdateCursor();
         }
 
-        void ShowPage(VisualElement page)
+        void ClosePage()
         {
+            _openPage = null;
             _page.Clear();
-            _page.Add(page);
         }
-
-        void ClosePage() => _page.Clear();
 
         void ConfirmLeave(string title, System.Action action)
         {
@@ -105,9 +156,9 @@ namespace EventHorizon.UI
                 action();
             }
             if (GameSession.HasUnsavedProgress && GameSession.Mode != GameMode.Science)
-                UiKit.Confirm(_root, title, "You have unsaved progress. Leave anyway?", "LEAVE", Go, danger: true);
+                UiKit.Confirm(_root, title, Loc.T("CONFIRM_UNSAVED"), Loc.T("BTN_LEAVE"), Go, danger: true);
             else
-                UiKit.Confirm(_root, title, "Are you sure?", "CONFIRM", Go);
+                UiKit.Confirm(_root, title, Loc.T("CONFIRM_SURE"), Loc.T("BTN_CONFIRM"), Go);
         }
 
         static void Quit()
@@ -119,29 +170,18 @@ namespace EventHorizon.UI
 #endif
         }
 
-        VisualElement BuildObjectives()
+        VisualElement BuildLanguage()
         {
             var p = new VisualElement();
             p.AddToClassList("eh-panel");
             var head = UiKit.Box(p, "eh-row");
-            UiKit.Text(head, "MISSION OBJECTIVES", "eh-panel-title");
+            UiKit.Text(head, Loc.T("PAUSE_LANGUAGE"), "eh-panel-title");
             UiKit.Box(head, "eh-spacer");
-            UiKit.Small(head, "BACK", ClosePage);
-            UiKit.Text(p, MissionTracker.CurrentTitle, "eh-card-title");
-            if (GameSession.Mode == GameMode.Campaign || GameSession.Mode == GameMode.None)
-                UiKit.Text(p, Campaign.Get(GameSession.State.chapter).summary, "eh-body");
-            UiKit.Divider(p);
-            foreach (var (text, progress, done, _) in MissionTracker.CurrentObjectives())
-            {
-                var row = UiKit.Box(p, "eh-row");
-                row.style.marginBottom = 6;
-                var l = UiKit.Text(row, (done ? "[x]  " : "[ ]  ") + text, "eh-body");
-                if (done) l.AddToClassList("eh-ok");
-                l.style.flexGrow = 1;
-                var bar = UiKit.Bar(row, out var fill);
-                bar.style.width = 160;
-                UiKit.SetFill(fill, done ? 1f : progress);
-            }
+            UiKit.Small(head, Loc.T("BTN_BACK"), ClosePage);
+            UiKit.Text(p, Loc.T("LANG_INTERFACE"), "eh-kicker");
+            LanguagePicker.Cards(p);
+            UiKit.Text(p, Loc.T("LANG_PROGRESS_SAFE"), "eh-small", "eh-dim");
+            UiKit.Text(p, Loc.T("LANG_MORE_IN_SETTINGS"), "eh-small", "eh-dim");
             return p;
         }
 
@@ -150,31 +190,28 @@ namespace EventHorizon.UI
             var p = new VisualElement();
             p.AddToClassList("eh-panel");
             var head = UiKit.Box(p, "eh-row");
-            UiKit.Text(head, "INVENTORY", "eh-panel-title");
+            UiKit.Text(head, Loc.T("PAUSE_INVENTORY"), "eh-panel-title");
             UiKit.Box(head, "eh-spacer");
-            UiKit.Small(head, "BACK", ClosePage);
+            UiKit.Small(head, Loc.T("BTN_BACK"), ClosePage);
             var suit = FindAnyObjectByType<SuitLifeSupport>();
-            UiKit.Text(p, "SUIT", "eh-kicker");
+            UiKit.Text(p, Loc.T("INV_SUIT"), "eh-kicker");
             if (suit != null)
             {
-                UiKit.Text(p, $"Oxygen: {suit.oxygenKg:0.000} / {suit.oxygenCapacityKg:0.0} kg  ({suit.HoursLeft:0.0} h)", "eh-mono");
-                UiKit.Text(p, $"Battery: {suit.energyWh:0} / {suit.energyCapacityWh:0} Wh", "eh-mono");
-                UiKit.Text(p, $"Suit integrity: {suit.integrity * 100f:0}%", "eh-mono");
+                UiKit.Text(p, Loc.T("INV_OXYGEN", suit.oxygenKg.ToString("0.000"), suit.oxygenCapacityKg.ToString("0.0"), suit.HoursLeft.ToString("0.0")), "eh-mono");
+                UiKit.Text(p, Loc.T("INV_BATTERY", suit.energyWh.ToString("0"), suit.energyCapacityWh.ToString("0")), "eh-mono");
+                UiKit.Text(p, Loc.T("INV_INTEGRITY", (suit.integrity * 100f).ToString("0")), "eh-mono");
             }
-            UiKit.Text(p, "Tools: ice drill, panel brush, multimeter, sample bags (12)", "eh-mono", "eh-dim");
+            UiKit.Text(p, Loc.T("INV_TOOLS"), "eh-mono", "eh-dim");
+            var items = Story.Story.State.items;
+            foreach (var i in items) UiKit.Text(p, "+ " + Loc.T("ITEM_" + i), "eh-mono");
             UiKit.Divider(p);
-            UiKit.Text(p, "COLONY STORES", "eh-kicker");
+            UiKit.Text(p, Loc.T("INV_STORES"), "eh-kicker");
             var grid = ColonyGrid.Instance;
             if (grid != null)
                 foreach (ResourceType t in System.Enum.GetValues(typeof(ResourceType)))
-                    UiKit.Text(p, $"{t}: {grid.Amount(t):0.0} / {grid.Capacity(t):0} kg", "eh-mono");
+                    UiKit.Text(p, Loc.T("INV_RESOURCE", Loc.T("RES_" + t.ToString().ToUpperInvariant()), grid.Amount(t).ToString("0.0"), grid.Capacity(t).ToString("0")), "eh-mono");
+            else UiKit.Text(p, Loc.T("INV_STORES_REMOTE"), "eh-dim");
             return p;
-        }
-
-        void OnDestroy()
-        {
-            if (GameSession.Paused) { Time.timeScale = 1f; AudioListener.pause = false; GameSession.Paused = false; }
-            GameInput.Unblock(this);
         }
     }
 }

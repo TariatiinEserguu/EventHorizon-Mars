@@ -26,6 +26,10 @@ namespace EventHorizon.Colony
         [Tooltip("Fraction of light blocked by settled dust. Mars Pathfinder lost ~0.28% per sol.")]
         [Range(0f, 1f)] public float dustCoverage;
         public float dustPerSol = 0.0028f;
+        [Tooltip("Anti-dust coating upgrade lowers this below 1.")]
+        public float dustMultiplier = 1f;
+        [Tooltip("A damaged connection: the panel produces nothing until repaired.")]
+        public bool faulted;
 
         public float CurrentWatts { get; private set; }
 
@@ -45,7 +49,7 @@ namespace EventHorizon.Colony
             var env = MarsEnvironment.Instance;
             if (env == null) return CurrentWatts = 0f;
 
-            dustCoverage = Mathf.Clamp01(dustCoverage + dustPerSol * dt / MarsEnvironment.SolSeconds);
+            dustCoverage = Mathf.Clamp01(dustCoverage + dustPerSol * dustMultiplier * dt / MarsEnvironment.SolSeconds);
 
             if (sunTracking && trackingPivot != null && env.SunDirection.y > 0f)
                 trackingPivot.rotation = Quaternion.FromToRotation(surface.up, env.SunDirection) * trackingPivot.rotation;
@@ -57,15 +61,28 @@ namespace EventHorizon.Colony
             float skyView = (1f + Mathf.Clamp(n.y, -1f, 1f)) * 0.5f;
             float irradiance = direct * cosIncidence + diffuseHorizontal * skyView;
 
-            CurrentWatts = irradiance * areaM2 * cellEfficiency * (1f - systemLosses) * (1f - dustCoverage);
+            CurrentWatts = faulted ? 0f : irradiance * areaM2 * cellEfficiency * (1f - systemLosses) * (1f - dustCoverage);
             return CurrentWatts;
         }
 
-        public string Prompt => $"Clean solar panel ({CurrentWatts:0} W, {dustCoverage:P0} dust)";
-        public bool CanInteract(GameObject user) => dustCoverage > 0.01f;
+        public string Prompt => faulted
+            ? Loc.T("PROMPT_PANEL_REPAIR")
+            : Loc.T("PROMPT_PANEL_CLEAN", CurrentWatts.ToString("0"), (dustCoverage * 100f).ToString("0"));
+        public bool CanInteract(GameObject user) => faulted || dustCoverage > 0.01f;
 
         public void Interact(GameObject user)
         {
+            if (faulted)
+            {
+                // A repair takes a few seconds of work; StoryWork shows the progress and calls back.
+                Story.StoryWork.Begin(transform, 3f, Loc.T("WORK_REPAIRING"), () =>
+                {
+                    faulted = false;
+                    Story.Story.SetFlag("panel_fixed_" + name);
+                    Game.GameEvents.Raise("panel_repaired");
+                });
+                return;
+            }
             Clean();
             Game.GameEvents.Raise("panel_cleaned");
         }

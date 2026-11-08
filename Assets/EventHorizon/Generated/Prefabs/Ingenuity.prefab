@@ -71,6 +71,7 @@ MonoBehaviour:
   title: Ingenuity Mars Helicopter
   facts: First powered flight on another planet (19 Apr 2021). The air is ~1% as dense as Earth's, so its 1.2 m rotors spun at about 2,400 rpm. It flew 72 times.
   eventId: inspect
+  key: Ingenuity
 --- !u!205 &5967804136403338733
 LODGroup:
   m_ObjectHideFlags: 0

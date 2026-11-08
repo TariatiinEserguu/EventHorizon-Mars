@@ -372,6 +372,7 @@ MonoBehaviour:
   title: Mars
   facts: 6,779 km across, with a thin 0.6 kPa CO2 atmosphere. Home of Olympus Mons (~22 km high) and Valles Marineris (~4,000 km long). Polar caps of water ice and CO2 frost.
   eventId: observe_mars
+  key: Mars
 --- !u!1 &8539421577501796231
 GameObject:
   m_ObjectHideFlags: 0

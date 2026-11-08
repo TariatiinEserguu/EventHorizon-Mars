@@ -153,7 +153,7 @@ namespace EventHorizon.EditorTools
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
-        static Material M(string key) => AssetDatabase.LoadAssetAtPath<Material>(MatPath("Kit_" + key));
+        internal static Material M(string key) => AssetDatabase.LoadAssetAtPath<Material>(MatPath("Kit_" + key));
 
         public static void BuildMaterials()
         {
@@ -192,7 +192,7 @@ namespace EventHorizon.EditorTools
 
         // ------------------------------------------------------------------ geometry helpers
 
-        static GameObject Part(PrimitiveType type, Transform parent, Vector3 pos, Vector3 scale, Vector3 euler, string mat, bool collider = false)
+        internal static GameObject Part(PrimitiveType type, Transform parent, Vector3 pos, Vector3 scale, Vector3 euler, string mat, bool collider = false)
         {
             var go = GameObject.CreatePrimitive(type);
             go.name = type + "_" + mat;
@@ -207,7 +207,7 @@ namespace EventHorizon.EditorTools
         }
 
         /// <summary>A straight pipe between two local points.</summary>
-        static void Pipe(Transform parent, Vector3 a, Vector3 b, float radius, string mat = "Steel")
+        internal static void Pipe(Transform parent, Vector3 a, Vector3 b, float radius, string mat = "Steel")
         {
             var mid = (a + b) * 0.5f;
             var dir = b - a;
@@ -224,7 +224,7 @@ namespace EventHorizon.EditorTools
             return prefab;
         }
 
-        static void Floodlight(Transform parent, Vector3 pos, Vector3 euler, float range = 30f, float intensity = 25f)
+        internal static void Floodlight(Transform parent, Vector3 pos, Vector3 euler, float range = 30f, float intensity = 25f)
         {
             var lamp = Part(PrimitiveType.Cube, parent, pos, new Vector3(0.5f, 0.15f, 0.25f), euler, "LampWarm");
             var light = new GameObject("Light").AddComponent<Light>();
@@ -360,7 +360,7 @@ namespace EventHorizon.EditorTools
             var trigger = root.AddComponent<ProximityTrigger>();
             trigger.eventId = "reached_habitat";
             trigger.radius = 16f;
-            trigger.message = "Habitat reached. Pressure and life support nominal.";
+            trigger.message = "TOAST_HABITAT_REACHED";
             Save(root, "Habitat");
         }
 
@@ -512,6 +512,7 @@ namespace EventHorizon.EditorTools
             col.height = 16f;
             col.radius = 2.4f;
             var info = root.AddComponent<Interaction.ScienceInspectable>();
+            info.key = "lander";
             info.title = "Ascent vehicle";
             info.facts = "Leaving Mars takes ~4.1 km/s to reach low orbit, about half of what leaving Earth takes. Its methane and oxygen propellant can be made on Mars from CO2 and water ice.";
             Save(root, "Lander");

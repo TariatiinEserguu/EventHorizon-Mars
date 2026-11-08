@@ -136,7 +136,7 @@ namespace EventHorizon.UI
             var row = Box(m, "eh-row");
             row.style.justifyContent = Justify.FlexEnd;
             row.style.marginTop = 16;
-            Small(row, "CANCEL", () => { UiAudio.Back(); bg.RemoveFromHierarchy(); });
+            Small(row, Loc.T("BTN_CANCEL"), () => { UiAudio.Back(); bg.RemoveFromHierarchy(); });
             Small(row, okText, () => { bg.RemoveFromHierarchy(); onOk?.Invoke(); }, danger ? "eh-btn-danger" : "eh-btn-primary");
         }
 
@@ -150,7 +150,7 @@ namespace EventHorizon.UI
             var row = Box(m, "eh-row");
             row.style.justifyContent = Justify.FlexEnd;
             row.style.marginTop = 16;
-            Small(row, "OK", () => bg.RemoveFromHierarchy(), "eh-btn-primary");
+            Small(row, Loc.T("BTN_OK"), () => bg.RemoveFromHierarchy(), "eh-btn-primary");
         }
 
         /// <summary>Text input dialog (rename save, name a save).</summary>
@@ -164,8 +164,8 @@ namespace EventHorizon.UI
             var row = Box(m, "eh-row");
             row.style.justifyContent = Justify.FlexEnd;
             row.style.marginTop = 16;
-            Small(row, "CANCEL", () => bg.RemoveFromHierarchy());
-            Small(row, "OK", () => { bg.RemoveFromHierarchy(); onOk?.Invoke(field.value); }, "eh-btn-primary");
+            Small(row, Loc.T("BTN_CANCEL"), () => bg.RemoveFromHierarchy());
+            Small(row, Loc.T("BTN_OK"), () => { bg.RemoveFromHierarchy(); onOk?.Invoke(field.value); }, "eh-btn-primary");
             field.schedule.Execute(() => field.Focus()).StartingIn(50);
         }
 
@@ -183,7 +183,7 @@ namespace EventHorizon.UI
         public static string Duration(double seconds)
         {
             var t = TimeSpan.FromSeconds(seconds);
-            return t.TotalHours >= 1 ? $"{(int)t.TotalHours}h {t.Minutes:00}m" : $"{t.Minutes}m {t.Seconds:00}s";
+            return t.TotalHours >= 1 ? Loc.T("TIME_HM", (int)t.TotalHours, t.Minutes.ToString("00")) : Loc.T("TIME_MS", t.Minutes, t.Seconds.ToString("00"));
         }
     }
 

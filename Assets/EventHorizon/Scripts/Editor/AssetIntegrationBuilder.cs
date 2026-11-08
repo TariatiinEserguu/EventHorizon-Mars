@@ -283,6 +283,7 @@ namespace EventHorizon.EditorTools
             {
                 var s = go.AddComponent<ScienceInspectable>();
                 s.eventId = "inspect_relay";
+                s.key = "relay";
                 s.title = "Relay dish";
                 s.facts = "Radio signals take 3 to 22 minutes to cross between Mars and Earth, depending on where the planets are. " +
                           "Every 26 months the Sun sits between them and blocks contact for about two weeks.";
@@ -394,6 +395,7 @@ namespace EventHorizon.EditorTools
             OptimizeGlb(root, model, name);
             AddBoxCollider(root);
             var s = root.AddComponent<ScienceInspectable>();
+            s.key = name;
             s.title = title;
             if (facts != null) s.facts = facts;
             // NASA models are detailed (Perseverance ~200k triangles): cull them when tiny on screen.

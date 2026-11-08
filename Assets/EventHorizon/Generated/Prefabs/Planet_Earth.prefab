@@ -373,6 +373,7 @@ MonoBehaviour:
   title: Earth
   facts: The only world known to host life. 71% ocean. Its nitrogen-oxygen atmosphere scatters blue light; at night the cities glow.
   eventId: observe_earth
+  key: Earth
 --- !u!1 &6166661188713711760
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,6 +21,10 @@ namespace EventHorizon.Agriculture
         [Range(0f, 1f)] public float waterRecovery = 0.95f;
         public bool plantOnStart = true;
 
+        /// <summary>Story/upgrade hooks: grow-light power (LED upgrade) and growth rate (pump failure, power cuts).</summary>
+        public static float LightPowerMultiplier = 1f;
+        public static float GrowthMultiplier = 1f;
+
         public bool Planted { get; private set; }
         public bool Dead { get; private set; }
         public float Growth01 { get; private set; }
@@ -63,7 +67,16 @@ namespace EventHorizon.Agriculture
             RefreshVisuals(force: true);
         }
 
-        public float DemandWatts => Planted && !Dead ? crop.lightWattsPerM2 * AreaM2 : 0f;
+        public float DemandWatts => Planted && !Dead ? crop.lightWattsPerM2 * AreaM2 * LightPowerMultiplier : 0f;
+
+        /// <summary>Sets growth directly (story setup: a crop close to harvest).</summary>
+        public void SetGrowth(float growth01)
+        {
+            if (!Planted) Plant(crop);
+            Growth01 = Mathf.Clamp01(growth01);
+            Health = Mathf.Max(Health, 0.9f);
+            RefreshVisuals(force: true);
+        }
 
         public void Supply(float satisfaction, float dt)
         {
@@ -74,8 +87,10 @@ namespace EventHorizon.Agriculture
             float needWater = crop.transpirationKgPerM2PerSol * AreaM2 * sols * (1f - waterRecovery);
             float waterFraction = needWater > 0f ? _grid.Take(ResourceType.Water, needWater) / needWater : 1f;
             float f = Mathf.Min(satisfaction, waterFraction);
+            // With the pumps down (GrowthMultiplier 0) plants stop growing but don't die: the trays hold water.
+            float grow = f * GrowthMultiplier;
 
-            if (Growth01 < 1f) Growth01 = Mathf.Min(1f, Growth01 + sols / Mathf.Max(crop.SolsToHarvest, 0.01f) * f);
+            if (Growth01 < 1f) Growth01 = Mathf.Min(1f, Growth01 + sols / Mathf.Max(crop.SolsToHarvest, 0.01f) * grow);
             // Two sols with no light or water kill a crop; good conditions slowly heal it.
             Health = Mathf.Clamp01(Health + (f > 0.9f ? 0.2f * sols : -(1f - f) * 0.5f * sols));
             if (Health <= 0f) Dead = true;
@@ -91,10 +106,11 @@ namespace EventHorizon.Agriculture
         {
             get
             {
-                if (!Planted) return crop != null ? $"Plant {crop.displayName}" : "Empty hydroponic bed";
-                if (Dead) return $"Clear dead {crop.displayName}";
-                if (Growth01 >= 1f) return $"Harvest {crop.displayName} (~{HarvestKg:0.0} kg)";
-                return $"{crop.displayName}: {Growth01:P0} grown, health {Health:P0}";
+                string name = crop != null ? Loc.TOr("CROP_" + crop.displayName.ToUpperInvariant(), crop.displayName) : "";
+                if (!Planted) return crop != null ? Loc.T("PROMPT_BED_PLANT", name) : Loc.T("PROMPT_BED_EMPTY");
+                if (Dead) return Loc.T("PROMPT_BED_CLEAR", name);
+                if (Growth01 >= 1f) return Loc.T("PROMPT_BED_HARVEST", name, HarvestKg.ToString("0.0"));
+                return Loc.T("PROMPT_BED_STATUS", name, (Growth01 * 100f).ToString("0"), (Health * 100f).ToString("0"));
             }
         }
 

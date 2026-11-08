@@ -371,3 +371,4 @@ MonoBehaviour:
   title: Jupiter
   facts: 'Largest planet: 11 Earths across, mostly hydrogen and helium. The Great Red Spot is a storm wider than Earth that has raged for centuries.'
   eventId: observe_jupiter
+  key: Jupiter

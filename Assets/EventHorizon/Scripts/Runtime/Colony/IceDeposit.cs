@@ -1,3 +1,4 @@
+using EventHorizon.Core;
 using EventHorizon.Interaction;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ namespace EventHorizon.Colony
             _startScale = visual.localScale;
         }
 
-        public string Prompt => $"Extract ice ({iceKg:0} kg left)";
+        public string Prompt => Loc.T("PROMPT_ICE", iceKg.ToString("0"));
         public bool CanInteract(GameObject user) => iceKg > 0f;
 
         public void Interact(GameObject user)
