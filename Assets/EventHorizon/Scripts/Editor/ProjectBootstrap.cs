@@ -12,7 +12,7 @@ namespace EventHorizon.EditorTools
     /// Runs once per editor load; it only creates things that are missing.
     /// </summary>
     [InitializeOnLoad]
-    static class ProjectBootstrap
+    internal static class ProjectBootstrap
     {
         const string SettingsDir = "Assets/EventHorizon/Settings";
         const string PipelinePath = SettingsDir + "/EventHorizon_URP.asset";
@@ -29,7 +29,7 @@ namespace EventHorizon.EditorTools
         }
 
         [MenuItem("Event Horizon/Setup/Create or Assign URP Pipeline Asset", priority = 100)]
-        static void CreatePipeline()
+        internal static void CreatePipeline()
         {
             try
             {
